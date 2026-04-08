@@ -27,7 +27,7 @@ Cyber Space for Human--AI Co-Evolution of Science}
 \maketitle
 
 \begin{abstract}
-We introduce Parallel Science, an open infrastructure that establishes a dedicated scientific publication space for AI-generated research---a ``parallel arXiv'' that runs alongside and interacts with the human scientific ecosystem. At its core is \href{https://papers.parallelscience.org}{papers.parallelscience.org}, a preprint repository where AI research systems continuously publish versioned, categorized papers with stable identifiers, full provenance, and open access. The publication infrastructure is agnostic to the upstream research system: any autonomous pipeline that produces papers and pushes them to GitHub can publish to the repository. Three systems are currently connected---a fleet of Denario research agents operating under human supervision, a fleet operating autonomously, and the CosmoEvolve Virtual Lab---spanning topics from fluid dynamics to observational cosmology. We describe the publication infrastructure, the fleet architecture, the end-to-end data flow from research task to indexed preprint, and present examples of published papers. The system is operational and producing papers at a cost of under one dollar per paper, creating a growing body of machine-generated scientific literature that is openly accessible, citable, and distinct from human-authored work.
+We introduce Parallel Science, an open infrastructure that establishes a dedicated scientific publication space for AI-generated research---a ``parallel arXiv'' that runs alongside and interacts with the human scientific ecosystem. At its core is \href{https://papers.parallelscience.org}{papers.parallelscience.org}, a preprint repository where AI research systems continuously publish versioned, categorized papers with stable identifiers, full provenance, and open access. The publication infrastructure is agnostic to the upstream research system: any autonomous pipeline that produces papers and pushes them to GitHub can publish to the repository. Three systems are currently connected---a fleet of Denario research agents operating under human supervision, a fleet operating autonomously, and the CosmoEvolve Virtual Lab---spanning topics from fluid dynamics to observational cosmology. We describe the publication infrastructure, the fleet architecture, the end-to-end data flow from research task to indexed preprint, and present examples of published papers. The system is operational. Example papers include data-driven discovery of governing equations for a turbulent fluid system (\href{https://papers.parallelscience.org/abs/2604.00016}{PX:2604.00016}), robust detection of simulation mismatch in weak lensing maps (\href{https://papers.parallelscience.org/abs/2604.00009}{PX:2604.00009}), and a multi-frequency analysis of the ACT DR6 thermal Sunyaev--Zel'dovich maps (\href{https://papers.parallelscience.org/abs/2604.00015}{PX:2604.00015}), produced at costs ranging from under one to a few dollars per paper.
 \end{abstract}
 
 
@@ -104,7 +104,7 @@ While the Parallel ArXiv accepts papers from any compatible source, the primary 
 
 \begin{figure}[t]
 \centering
-\begin{tikzpicture}[
+\begin{tikzpicture}[scale=0.92, every node/.style={transform shape},
   box/.style={draw, rounded corners=3pt, minimum height=0.9cm, font=\small, align=center, thick},
   service/.style={box, fill=NavyBlue!12, text=NavyBlue!90!black},
   scientist/.style={box, fill=gray!8, text=black, minimum width=2.3cm, minimum height=2.0cm},
@@ -120,8 +120,8 @@ While the Parallel ArXiv accepts papers from any compatible source, the primary 
   {\scriptsize OpenClaw + Slack}\\[-1pt]
   {\scriptsize Denario pipeline}
 };
-\node[font=\normalsize, text=gray!40] at (2.3, 0) {$\cdots$};
-\node[scientist] (dN) at (3.6, 0) {
+\node[font=\normalsize, text=gray!40] at (2.4, 0) {$\cdots$};
+\node[scientist] (dN) at (3.8, 0) {
   \textbf{denario-\textit{N}}\\[1pt]
   {\scriptsize OpenClaw + Slack}\\[-1pt]
   {\scriptsize Denario pipeline}
@@ -129,12 +129,12 @@ While the Parallel ArXiv accepts papers from any compatible source, the primary 
 
 \begin{scope}[on background layer]
 \node[fleetbox, gray!40,
-      fit=(d1)(dN), inner xsep=6pt,
-      label={[font=\scriptsize\itshape, text=gray!50!black]above:{Supervised fleet}}] (fleetA) {};
+      fit=(d1)(dN), inner xsep=8pt, inner ysep=10pt,
+      label={[font=\scriptsize\itshape, text=gray!50!black, yshift=4pt]above:{Supervised fleet}}] (fleetA) {};
 \end{scope}
 
 % === Fleet B: Denario autonomous (Python loop, no Slack) ===
-\node[scientist] (da) at (6.5, 0) {
+\node[scientist] (da) at (7, 0) {
   \textbf{Denario}\\[1pt]
   {\scriptsize Python loop}\\[-1pt]
   {\scriptsize Denario pipeline}
@@ -142,12 +142,12 @@ While the Parallel ArXiv accepts papers from any compatible source, the primary 
 
 \begin{scope}[on background layer]
 \node[fleetbox, gray!40,
-      fit=(da), inner xsep=10pt,
-      label={[font=\scriptsize\itshape, text=gray!50!black]above:{Autonomous fleet}}] (fleetB) {};
+      fit=(da), inner xsep=12pt, inner ysep=10pt,
+      label={[font=\scriptsize\itshape, text=gray!50!black, yshift=4pt]above:{Autonomous fleet}}] (fleetB) {};
 \end{scope}
 
 % === Fleet C: CosmoEvolve ===
-\node[scientist] (ce) at (9.6, 0) {
+\node[scientist] (ce) at (10.2, 0) {
   \textbf{CosmoEvolve}\\[1pt]
   {\scriptsize OpenClaw}\\[-1pt]
   {\scriptsize CosmoEvolve pipeline}
@@ -155,47 +155,47 @@ While the Parallel ArXiv accepts papers from any compatible source, the primary 
 
 \begin{scope}[on background layer]
 \node[fleetbox, gray!40,
-      fit=(ce), inner xsep=10pt,
-      label={[font=\scriptsize\itshape, text=gray!50!black]above:{Virtual lab}}] (fleetC) {};
+      fit=(ce), inner xsep=12pt, inner ysep=10pt,
+      label={[font=\scriptsize\itshape, text=gray!50!black, yshift=4pt]above:{Virtual lab}}] (fleetC) {};
 \end{scope}
 
 % === Human supervisors (top left) ===
-\node[service, minimum width=2.8cm] (human) at (1.8, 3.2) {Human Supervisors\\[-1pt]{\scriptsize Slack}};
+\node[service, minimum width=2.8cm] (human) at (1.9, 3.5) {Human Supervisors\\[-1pt]{\scriptsize Slack}};
 
 % === Mission Control (top right) ===
-\node[service, minimum width=2.6cm] (dash) at (7, 3.2) {Mission Control\\[-1pt]{\scriptsize Fleet dashboard}};
+\node[service, minimum width=2.6cm] (dash) at (7.5, 3.5) {Mission Control\\[-1pt]{\scriptsize Fleet dashboard}};
 
 % === LLM providers (left) ===
-\node[external, minimum width=2.4cm] (llms) at (-3.2, 0) {LLM Providers\\[-1pt]{\scriptsize Anthropic, OpenAI}\\[-1pt]{\scriptsize Google, MiniMax}};
+\node[external, minimum width=2.4cm] (llms) at (-3.4, 0) {LLM Providers\\[-1pt]{\scriptsize Anthropic, OpenAI}\\[-1pt]{\scriptsize Google, MiniMax}};
 
 % === GitHub (bottom left) ===
-\node[service, minimum width=2.2cm] (gh) at (2.2, -3.0) {GitHub\\[-1pt]{\scriptsize Repos + Pages}};
+\node[service, minimum width=2.2cm] (gh) at (1.8, -3.2) {GitHub\\[-1pt]{\scriptsize Repos + Pages}};
 
-% === Parallel ArXiv (bottom center) ===
-\node[box, fill=BrickRed!15, text=BrickRed!80!black, minimum width=2.8cm] (pax) at (6.2, -3.0) {\textbf{Parallel ArXiv}\\[-1pt]{\scriptsize papers.parallelscience.org}};
+% === Parallel ArXiv (bottom center-right) ===
+\node[box, fill=BrickRed!15, text=BrickRed!80!black, minimum width=2.8cm] (pax) at (6.4, -3.2) {\textbf{Parallel ArXiv}\\[-1pt]{\scriptsize papers.parallelscience.org}};
 
 % === API (bottom right) ===
-\node[service, minimum width=1.4cm] (api) at (9.6, -3.0) {API\\[-1pt]{\scriptsize REST}};
+\node[service, minimum width=1.4cm] (api) at (10.2, -3.2) {API\\[-1pt]{\scriptsize REST}};
 
 % === Arrows ===
 % Human <-> supervised fleet
 \draw[darr] (human.south) -- (fleetA.north);
 
 % Dashboard: solid from supervised fleet, dashed from others
-\draw[arr] (fleetA.north east) ++(0.1,0) -- ++(0,0.5) -| ([xshift=-5pt]dash.south);
-\draw[arr, dashed] (fleetB.north) ++(0,0.05) -- ([xshift=0pt]dash.south);
-\draw[arr, dashed] (fleetC.north) ++(0,0.05) -- ++(0,0.5) -| ([xshift=5pt]dash.south);
+\draw[arr] ([xshift=10pt]fleetA.north east) -- ++(0,0.9) -| ([xshift=-5pt]dash.south);
+\draw[arr, dashed] (fleetB.north) -- ++(0,0.7) -| ([xshift=0pt]dash.south);
+\draw[arr, dashed] (fleetC.north) -- ++(0,0.9) -| ([xshift=5pt]dash.south);
 
 % LLMs <-> fleets
 \draw[darr] (llms.east) -- (d1.west);
 
 % Fleets -> GitHub
-\draw[arr] (fleetA.south) -- ++(0,-0.3) -| ([xshift=-5pt]gh.north);
-\draw[arr] (da.south) -- ++(0,-0.45) -| ([xshift=5pt]gh.north);
-\draw[arr] (ce.south) -- ++(0,-0.3) -| ([xshift=12pt]gh.north);
+\draw[arr] (fleetA.south) -- ++(0,-0.4) -| ([xshift=-5pt]gh.north);
+\draw[arr] (da.south) -- ++(0,-0.6) -| ([xshift=5pt]gh.north);
+\draw[arr] (ce.south) -- ++(0,-0.4) -| ([xshift=12pt]gh.north);
 
-% GitHub -> Parallel ArXiv
-\draw[arr] (gh.east) -- node[above, font=\scriptsize, text=gray!60!black] {webhook} (pax.west);
+% GitHub -> Parallel ArXiv (more space for webhook label)
+\draw[arr] (gh.east) -- node[above, font=\scriptsize, text=gray!60!black, pos=0.5] {webhook} (pax.west);
 
 % Parallel ArXiv -> API
 \draw[arr] (pax.east) -- (api.west);
@@ -215,11 +215,11 @@ The design of the Denario research pipeline, including its dual-backend architec
 
 \subsection{Fleet configuration and isolation}
 
-The fleet is configured through a single Python file specifying the number of scientists, the default LLM model and per-scientist overrides, resource allocation (CPU, memory, GPU), and per-scientist research pipeline parameters. Table~\ref{tab:fleet} summarizes the current fleet configuration. A setup script reads this configuration and generates a Docker Compose file, per-scientist directories, and environment variable mappings.
+The entire fleet runs on a single workstation equipped with an AMD Ryzen Threadripper PRO 9995WX (96 cores), 512\,GB of RAM, and two NVIDIA RTX PRO 6000 Blackwell GPUs (96\,GB VRAM each). The fleet is configured through a single Python file specifying the number of scientists, the default LLM model and per-scientist overrides, resource allocation (CPU, memory, GPU), and per-scientist research pipeline parameters. The supervised fleet currently runs $N = 12$ scientists; Table~\ref{tab:fleet} summarizes their configuration. A setup script reads this configuration and generates a Docker Compose file, per-scientist directories, and environment variable mappings.
 
 \begin{table}[t]
 \centering
-\caption{Current fleet configuration. Scientists not listed individually use the default configuration.}
+\caption{Current configuration of the supervised denario-\textit{i} fleet ($N = 12$). Scientists not listed individually use the default configuration.}
 \label{tab:fleet}
 \begin{tabular}{@{}llccc@{}}
 \toprule
