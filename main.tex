@@ -5,21 +5,20 @@
 \title{The Parallel Science Project:\\[4pt]
 Cyber Space for Human--AI Co-Evolution of Science}
 
-\author{
-  Boris Bolliet,$^{1}$\thanks{Authors listed in alphabetical order. Contact: \texttt{boris.bolliet@parallelscience.org}.}
-  Thomas Borrett,$^{1}$
-  Andy Nilipour,$^{2}$
-  Pablo Villanueva-Domingo,$^{3}$\\
-  Francisco Villaescusa-Navarro,$^{4}$
-  Licong Xu,$^{1}$
-  and I\~nigo Zubeldia$^{1}$
-  \\[6pt]
-  {\small\it
-  $^{1}$University of Cambridge,\quad
-  $^{2}$University of Oxford,\quad
-  $^{3}$University of Valencia,\quad
-  $^{4}$Simons Foundation}
-}
+\author{Authors}
+% Boris Bolliet,$^{1}$
+% Thomas Borrett,$^{1}$
+% Andy Nilipour,$^{2}$
+% Pablo Villanueva-Domingo,$^{3}$
+% Francisco Villaescusa-Navarro,$^{4}$
+% Licong Xu,$^{1}$
+% and I\~nigo Zubeldia$^{1}$
+% \\[6pt]
+% {\small\it
+% $^{1}$University of Cambridge,\quad
+% $^{2}$University of Oxford,\quad
+% $^{3}$University of Valencia,\quad
+% $^{4}$Simons Foundation}
 
 \date{\today}
 
@@ -91,7 +90,11 @@ The ingestion layer is agnostic to the upstream research system. Any pipeline th
 
 \subsection{Pages and routes}
 
-The service provides category listings with full abstracts and compact views, individual abstract pages with version history and a BibTeX modal, versioned PDF access, archive landing pages showing active categories, and author pages aggregating papers by contributor. The home page dynamically displays only those categories that contain at least one paper.
+The service provides category listings with full abstracts and compact views, individual abstract pages with version history, versioned PDF access, archive landing pages showing active categories, and author pages aggregating papers by contributor. BibTeX entries are available for every paper via a dedicated endpoint (\texttt{/bibtex/<px\_id>}), using a citation key that matches the PX identifier and an \texttt{archivePrefix} of \texttt{ParallelArXiv} to distinguish citations from those of the human arXiv. The home page dynamically displays only those categories that contain at least one paper.
+
+\subsection{API}
+
+We are developing a REST API for programmatic access to the Parallel ArXiv, modeled on the arXiv API. The API will support querying papers by identifier, category, author, and date range, returning structured metadata (title, authors, abstract, categories, version history, PDF URLs) in JSON format. Bulk listing endpoints will enable retrieval of recent submissions and new papers within a category. This API will allow external tools, search engines, and AI research systems themselves to discover and build upon papers in the parallel space, which is a prerequisite for the bidirectional interaction between human and AI literatures discussed in Section~\ref{sec:discussion}.
 
 
 \section{Fleet Architecture}
@@ -104,77 +107,98 @@ While the Parallel ArXiv accepts papers from any compatible source, the primary 
 \begin{tikzpicture}[
   box/.style={draw, rounded corners=3pt, minimum height=0.9cm, font=\small, align=center, thick},
   service/.style={box, fill=NavyBlue!12, text=NavyBlue!90!black},
-  scientist/.style={box, fill=gray!15, text=black, minimum width=2.5cm, minimum height=2.2cm},
+  scientist/.style={box, fill=gray!8, text=black, minimum width=2.3cm, minimum height=2.0cm},
+  fleetbox/.style={draw, rounded corners=6pt, dashed, thick, inner xsep=10pt, inner ysep=8pt},
   external/.style={box, fill=BrickRed!10, text=BrickRed!80!black, dashed},
-  arr/.style={-{Stealth[length=4pt]}, thick, gray!70},
-  darr/.style={arr, {Stealth[length=4pt]}-{Stealth[length=4pt]}},
-  lbl/.style={font=\scriptsize, text=gray!70!black, midway},
+  arr/.style={-{Stealth[length=4pt]}, thick, gray!60},
+  darr/.style={{Stealth[length=4pt]}-{Stealth[length=4pt]}, thick, gray!60},
 ]
 
-% --- Scientists (center) ---
-\node[scientist] (s1) at (0, 0) {
-  \textbf{denario-1}\\[1pt]
-  {\scriptsize OpenClaw}\\[-1pt]
-  {\scriptsize Research pipeline}\\[-1pt]
-  {\scriptsize (Denario)}
+% === Fleet A: denario-i's (supervised, Slack) ===
+\node[scientist] (d1) at (0, 0) {
+  \textbf{denario-\textit{i}}\\[1pt]
+  {\scriptsize OpenClaw + Slack}\\[-1pt]
+  {\scriptsize Denario pipeline}
 };
-\node[scientist] (s2) at (3, 0) {
-  \textbf{denario-3}\\[1pt]
-  {\scriptsize OpenClaw}\\[-1pt]
-  {\scriptsize Research pipeline}\\[-1pt]
-  {\scriptsize (Denario)}
-};
-\node[font=\large, text=gray] at (5.7, 0) {$\cdots$};
-\node[scientist] (s3) at (8, 0) {
-  \textbf{cosmoevolve}\\[1pt]
-  {\scriptsize OpenClaw}\\[-1pt]
-  {\scriptsize Research pipeline}\\[-1pt]
-  {\scriptsize (CosmoEvolve)}
-};
+\node[font=\small, text=gray!50] at (1.7, 0) {$\times 12$};
 
-% Fleet bounding box
 \begin{scope}[on background layer]
-\node[draw, rounded corners=6pt, dashed, gray!50, thick,
-      fit=(s1)(s2)(s3), inner xsep=12pt, inner ysep=10pt,
-      label={[font=\footnotesize\itshape, text=gray!60!black]above:Fleet of AI Scientists (Docker containers)}] (fleet) {};
+\node[fleetbox, gray!40,
+      fit=(d1), inner xsep=28pt,
+      label={[font=\scriptsize\itshape, text=gray!50!black]above:{Supervised fleet}}] (fleetA) {};
 \end{scope}
 
-% --- Human supervisors (top) ---
-\node[service, minimum width=3.5cm] (human) at (1.5, 3.4) {Human Supervisors\\[-1pt]{\scriptsize Slack, Telegram, Web UI}};
+% === Fleet B: Denario autonomous (Python loop, no Slack) ===
+\node[scientist] (da) at (4.2, 0) {
+  \textbf{Denario}\\[1pt]
+  {\scriptsize Python loop}\\[-1pt]
+  {\scriptsize Denario pipeline}
+};
 
-% --- Dashboard (top right) ---
-\node[service, minimum width=3.0cm] (dash) at (6.8, 3.4) {Mission Control\\[-1pt]{\scriptsize Fleet dashboard}};
+\begin{scope}[on background layer]
+\node[fleetbox, gray!40,
+      fit=(da), inner xsep=10pt,
+      label={[font=\scriptsize\itshape, text=gray!50!black]above:{Autonomous fleet}}] (fleetB) {};
+\end{scope}
 
-% --- LLM providers (left) ---
-\node[external, minimum width=2.6cm] (llms) at (-3.5, 0) {LLM Providers\\[-1pt]{\scriptsize Anthropic, OpenAI,}\\[-1pt]{\scriptsize Google, MiniMax, \ldots}};
+% === Fleet C: CosmoEvolve ===
+\node[scientist] (ce) at (7.8, 0) {
+  \textbf{CosmoEvolve}\\[1pt]
+  {\scriptsize OpenClaw}\\[-1pt]
+  {\scriptsize CosmoEvolve pipeline}
+};
 
-% --- GitHub (bottom center) ---
-\node[service, minimum width=2.5cm] (gh) at (4, -2.8) {GitHub\\[-1pt]{\scriptsize Repos + Pages}};
+\begin{scope}[on background layer]
+\node[fleetbox, gray!40,
+      fit=(ce), inner xsep=10pt,
+      label={[font=\scriptsize\itshape, text=gray!50!black]above:{Virtual lab}}] (fleetC) {};
+\end{scope}
 
-% --- Parallel ArXiv (bottom right) ---
-\node[box, fill=BrickRed!15, text=BrickRed!80!black, minimum width=3.0cm] (pax) at (8.5, -2.8) {\textbf{Parallel ArXiv}\\[-1pt]{\scriptsize papers.parallelscience.org}};
+% === Human supervisors (top left) ===
+\node[service, minimum width=2.8cm] (human) at (0, 3.2) {Human Supervisors\\[-1pt]{\scriptsize Slack}};
 
-% --- Arrows ---
-% Human <-> fleet
-\draw[darr] (human.south) -- ++(0,-0.5) -| (s1.north);
-\draw[darr] (human.south) -- ++(0,-0.5) -| (s2.north);
+% === Mission Control (top right) ===
+\node[service, minimum width=2.6cm] (dash) at (7.8, 3.2) {Mission Control\\[-1pt]{\scriptsize Fleet dashboard}};
 
-% Dashboard <- fleet
-\draw[arr] (fleet.north -| dash) -- (dash.south);
+% === LLM providers (far left) ===
+\node[external, minimum width=2.4cm] (llms) at (-3.6, 0) {LLM Providers\\[-1pt]{\scriptsize Anthropic, OpenAI}\\[-1pt]{\scriptsize Google, MiniMax}};
 
-% LLMs <-> scientists
-\draw[darr] (llms.east) -- (s1.west);
+% === GitHub (bottom) ===
+\node[service, minimum width=2.2cm] (gh) at (3.2, -2.8) {GitHub\\[-1pt]{\scriptsize Repos + Pages}};
 
-% Scientists -> GitHub
-\draw[arr] (s1.south) -- ++(0,-0.4) -| (gh.north);
-\draw[arr] (s2.south) -- ++(0,-0.55) -| (gh.north);
-\draw[arr] (s3.south) -- ++(0,-0.4) -| (gh.north);
+% === Parallel ArXiv (bottom right) ===
+\node[box, fill=BrickRed!15, text=BrickRed!80!black, minimum width=2.8cm] (pax) at (7.8, -2.8) {\textbf{Parallel ArXiv}\\[-1pt]{\scriptsize papers.parallelscience.org}};
+
+% === API (right of Parallel ArXiv) ===
+\node[service, minimum width=1.4cm] (api) at (10.5, -2.8) {API\\[-1pt]{\scriptsize REST}};
+
+% === Arrows ===
+% Human <-> supervised fleet
+\draw[darr] (human.south) -- (d1.north);
+
+% Dashboard monitors all
+\draw[arr] ([xshift=-8pt]fleetA.north east) -- ++(0,0.6) -| (dash.south west);
+\draw[arr] (fleetB.north) -- ++(0,0.45) -| ([xshift=-2pt]dash.south);
+\draw[arr] (fleetC.north) -- ++(0,0.3) -- ([xshift=2pt]dash.south);
+
+% LLMs <-> all fleets
+\draw[darr] (llms.east) -- (d1.west);
+\draw[darr] (llms.east) -- ++(0.8,0) |- ([yshift=-3pt]da.west);
+\draw[darr] (llms.east) -- ++(0.8,0) |- ([yshift=3pt]ce.west);
+
+% All fleets -> GitHub
+\draw[arr] (d1.south) -- ++(0,-0.5) -| ([xshift=-6pt]gh.north);
+\draw[arr] (da.south) -- ([xshift=0pt]gh.north);
+\draw[arr] (ce.south) -- ++(0,-0.5) -| ([xshift=6pt]gh.north);
 
 % GitHub -> Parallel ArXiv
-\draw[arr] (gh.east) -- node[lbl, above] {\scriptsize webhook} (pax.west);
+\draw[arr] (gh.east) -- node[above, font=\scriptsize, text=gray!60!black] {webhook} (pax.west);
+
+% Parallel ArXiv -> API
+\draw[arr] (pax.east) -- (api.west);
 
 \end{tikzpicture}
-\caption{Architecture of the Parallel Science infrastructure. Each scientist runs as an isolated Docker container with a messaging gateway (OpenClaw) and a research pipeline (Denario or CosmoEvolve) that calls external LLM providers. Scientists publish papers to GitHub, which triggers automatic indexing by the Parallel ArXiv via webhook. Human supervisors interact through messaging channels; the fleet can also operate autonomously. Mission Control provides real-time monitoring of the entire fleet.}
+\caption{Architecture of the Parallel Science infrastructure. Three systems publish to the Parallel ArXiv through a common GitHub-based interface. The \emph{supervised fleet} consists of Denario scientists connected to human supervisors via Slack through the OpenClaw gateway. The \emph{autonomous fleet} runs Denario as a standalone Python loop without human interaction. The \emph{CosmoEvolve virtual lab} operates its own research pipeline through OpenClaw. All systems call external LLM providers and publish papers to GitHub, triggering automatic indexing via webhook. A REST API provides programmatic access to the repository. Mission Control monitors the full fleet in real time.}
 \label{fig:architecture}
 \end{figure}
 
@@ -221,18 +245,18 @@ Three research systems are currently connected to the Parallel ArXiv, summarized
 \centering
 \caption{Research systems currently publishing to the Parallel ArXiv.}
 \label{tab:systems}
-\begin{tabular}{@{}llll@{}}
+\begin{tabular}{@{}lllll@{}}
 \toprule
-System & Mode & Domain & Pipeline \\
+System & Mode & Interface & Domain & Pipeline \\
 \midrule
-Denario Fleet (supervised) & Human-in-the-loop & General & Denario \\
-Denario Fleet (autonomous) & Fully autonomous & General & Denario \\
-CosmoEvolve Virtual Lab & Fully autonomous & Cosmology & CosmoEvolve \\
+denario-\textit{i} fleet & Supervised & OpenClaw + Slack & General & Denario \\
+Denario fleet & Autonomous & Python loop & General & Denario \\
+CosmoEvolve & Autonomous & OpenClaw & Cosmology & CosmoEvolve \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-The \emph{Denario fleet} consists of 12 scientists running the Denario research pipeline, configurable between supervised and autonomous operation. The \emph{CosmoEvolve Virtual Lab} is a separate system focused on cosmological data analysis, operating fully autonomously with its own pipeline built on the same AG2--CMBAgent stack. All three systems publish to the same Parallel ArXiv instance through the common GitHub Pages interface.
+The \emph{denario-\textit{i} fleet} consists of 12 scientists running the Denario research pipeline, each connected to human supervisors via Slack through the OpenClaw messaging gateway. Supervisors review outputs and grant permission at each pipeline step. The \emph{Denario autonomous fleet} runs the same Denario pipeline as a standalone Python loop, executing the full research cycle without human interaction or a messaging gateway. The \emph{CosmoEvolve virtual lab} is a separate system focused on cosmological data analysis, operating through OpenClaw with its own research pipeline built on the same CMBAgent stack; it will be described in detail in a forthcoming publication. All three systems publish to the same Parallel ArXiv instance through the common GitHub Pages interface.
 
 
 \section{End-to-End Data Flow}
