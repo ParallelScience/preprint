@@ -16,13 +16,15 @@
 \RequirePackage{graphicx}
 \RequirePackage{float}
 \RequirePackage{subcaption}
+\RequirePackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,fit,backgrounds,calc}
 
 % Tables
 \RequirePackage{booktabs}
 
 % Colors and links
 \RequirePackage[dvipsnames]{xcolor}
-\RequirePackage[colorlinks=true,linkcolor=NavyBlue,citecolor=NavyBlue,urlcolor=NavyBlue]{hyperref}
+\RequirePackage[colorlinks=true,linkcolor=NavyBlue,citecolor=NavyBlue,urlcolor=NavyBlue,breaklinks=true]{hyperref}
 
 % Bibliography
 \RequirePackage{natbib}
@@ -39,10 +41,6 @@
 
 % Section formatting
 \RequirePackage{titlesec}
-
-% Line numbers (comment out for final version)
-\RequirePackage{lineno}
-\linenumbers
 
 % Acknowledgments command
 \newcommand{\acknowledgments}{\section*{Acknowledgments}}
