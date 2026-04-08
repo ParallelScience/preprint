@@ -1,0 +1,50 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{parallelscience}[2026/04/08 Parallel Science preprint style]
+
+% Page geometry
+\RequirePackage[margin=1in]{geometry}
+
+% Fonts and encoding
+\RequirePackage[T1]{fontenc}
+\RequirePackage{lmodern}
+\RequirePackage{microtype}
+
+% Math
+\RequirePackage{amsmath,amssymb,amsfonts}
+
+% Graphics and figures
+\RequirePackage{graphicx}
+\RequirePackage{float}
+\RequirePackage{subcaption}
+
+% Tables
+\RequirePackage{booktabs}
+
+% Colors and links
+\RequirePackage[dvipsnames]{xcolor}
+\RequirePackage[colorlinks=true,linkcolor=NavyBlue,citecolor=NavyBlue,urlcolor=NavyBlue]{hyperref}
+
+% Bibliography
+\RequirePackage{natbib}
+
+% Code listings
+\RequirePackage{listings}
+\lstset{
+  basicstyle=\ttfamily\small,
+  breaklines=true,
+  frame=single,
+  framesep=3pt,
+  columns=fullflexible,
+}
+
+% Section formatting
+\RequirePackage{titlesec}
+
+% Line numbers (comment out for final version)
+\RequirePackage{lineno}
+\linenumbers
+
+% Acknowledgments command
+\newcommand{\acknowledgments}{\section*{Acknowledgments}}
+
+\endinput
