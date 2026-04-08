@@ -2,22 +2,22 @@
 
 \usepackage{parallelscience}
 
-\title{The Parallel Science Project: Cyber Space for Human--AI Co-Evolution of Science}
+\title{The Parallel Science Project:\\Cyber Space for Human--AI Co-Evolution of Science}
 
 \author{
-  Boris Bolliet\textsuperscript{1}\thanks{Corresponding author: \texttt{boris.bolliet@parallelscience.org}. Authors listed in alphabetical order.},
-  Thomas Borrett\textsuperscript{1},
-  Andy Nilipour\textsuperscript{2},
-  Pablo Villanueva-Domingo\textsuperscript{3},
-  Francisco Villaescusa-Navarro\textsuperscript{4},
-  Licong Xu\textsuperscript{1},
-  I\~nigo Zubeldia\textsuperscript{1}
+  Boris Bolliet,$^{1}$\thanks{Corresponding author: \texttt{boris.bolliet@parallelscience.org}. Authors listed in alphabetical order.}
+  Thomas Borrett,$^{1}$
+  Andy Nilipour,$^{2}$
+  Pablo Villanueva-Domingo,$^{3}$\\
+  Francisco Villaescusa-Navarro,$^{4}$
+  Licong Xu,$^{1}$
+  I\~nigo Zubeldia$^{1}$
   \\[6pt]
-  \small
-  \textsuperscript{1}University of Cambridge,
-  \textsuperscript{2}University of Oxford,
-  \textsuperscript{3}University of Valencia,
-  \textsuperscript{4}Simons Foundation
+  {\small\it
+  $^{1}$University of Cambridge,
+  $^{2}$University of Oxford,
+  $^{3}$University of Valencia,
+  $^{4}$Simons Foundation}
 }
 
 \date{\today}
@@ -27,283 +27,264 @@
 \maketitle
 
 \begin{abstract}
-We present Parallel Science, an open infrastructure for autonomous scientific discovery in which fleets of AI research agents operate continuously, generating hypotheses, writing and executing code, analyzing data, and producing papers---all under human supervision. The system integrates five principal components: (i) a multi-agent orchestration framework providing planning-and-control execution; (ii) a research backend that decomposes scientific tasks into subtasks delegated to specialized agents; (iii) a fleet management layer that deploys and monitors multiple autonomous scientists as isolated containers; (iv) a messaging gateway enabling human supervisors to interact with agents through standard communication channels; and (v) a paper repository that automatically indexes, versions, and serves published results. Each agent runs a full research pipeline---from exploratory data analysis through iterative hypothesis refinement to \LaTeX{} paper generation and publication---with every step committed to version control. A real-time dashboard provides cost, progress, and status transparency across the fleet. We describe the architecture, deployment model, and the end-to-end data flow from research task to indexed publication. The system is operational and has produced its first papers, demonstrating that continuous, parallel, human-supervised AI research is technically feasible at modest cost.
+We introduce Parallel Science, an open infrastructure that establishes a dedicated scientific publication space for AI-generated research---a ``parallel arXiv'' that runs alongside and interacts with the human scientific ecosystem. At its core is \texttt{papers.parallelscience.org}, a preprint repository where autonomous AI research agents continuously publish versioned, categorized papers with stable identifiers, full provenance, and open access. The repository is populated by a fleet of AI scientists that operate in parallel, each running a complete research pipeline---from hypothesis generation through computation to \LaTeX{} paper writing---under human supervision. Every result is committed to version control and automatically indexed within minutes of completion. We describe the publication infrastructure, the fleet architecture that feeds it, and the end-to-end data flow from research task to indexed preprint. The system is operational: multiple AI scientists are producing and publishing papers at a cost of under one dollar per paper, creating a growing body of machine-generated scientific literature that is openly accessible, citable, and distinct from human-authored work.
 \end{abstract}
 
 
 \section{Introduction}
 \label{sec:intro}
 
-Scientific discovery has historically been constrained by human bandwidth: the number of hypotheses that can be conceived, the volume of literature that can be surveyed, and the experiments that can be designed, executed, and analyzed within a researcher's working day. Recent advances in large language models (LLMs) and multi-agent systems have opened the possibility of delegating substantial portions of the research cycle to autonomous agents \citep{lu2024aiscientist,boiko2023autonomous,huang2024mlagentbench}.
+The scientific literature is a human institution. For over three centuries, researchers have communicated discoveries through papers---manuscripts written by humans, reviewed by humans, and read by humans. The arXiv preprint server, launched in 1991 \citep{ginsparg2011arxiv}, accelerated this process by making papers freely and immediately available, but the fundamental model remains unchanged: humans produce scientific knowledge, and the literature is the record of that production.
 
-We introduce \textbf{Parallel Science}, an open infrastructure designed around a simple premise: AI agents should operate as \emph{scientists}---not merely as tools invoked on demand, but as persistent entities that carry out full research cycles under human supervision. The system is designed so that multiple such agents can work simultaneously across different research questions, models, and datasets, while human supervisors retain oversight at every stage.
+Large language models and multi-agent systems are now capable of generating scientific hypotheses, writing and executing code, analyzing data, and producing coherent research papers \citep{lu2024aiscientist,boiko2023autonomous,huang2024mlagentbench}. This raises a question that is as much institutional as it is technical: \emph{where should machine-generated scientific work be published?}
 
-The key design principles are:
-\begin{enumerate}
-  \item \textbf{End-to-end autonomy with human oversight.} Each agent runs a complete research pipeline---data exploration, idea generation, methodology design, computation, evaluation, paper writing, and publication---but must report results and receive permission from a human supervisor before proceeding to the next stage.
-  \item \textbf{Parallelism at the fleet level.} Multiple agents operate concurrently, each in an isolated environment with its own resources, model configuration, and communication channel. This enables exploration of diverse research directions simultaneously.
-  \item \textbf{Reproducibility through version control.} Every step of every research project is committed to a Git repository. The full provenance of any result---from initial data description to final paper---is traceable through the commit history.
-  \item \textbf{Transparency of cost and progress.} A real-time dashboard tracks each agent's status, resource usage, pipeline progress, and cumulative cost, enabling informed allocation decisions.
-  \item \textbf{Open publication.} Completed papers are automatically published to a dedicated repository modeled on the arXiv preprint server, with stable identifiers, versioning, and category classification.
-\end{enumerate}
+We argue that AI-generated research should not be mixed indiscriminately into the existing human literature. The provenance is different, the failure modes are different, and the standards of evaluation are still being established. At the same time, AI-generated results should not be hidden or discarded---they may contain genuine insights, and transparency about what machines produce is essential for the co-evolution of human and artificial intelligence in science.
 
-This paper describes the infrastructure that makes this possible. We focus on the system architecture, deployment model, and data flow rather than the research methodology of individual agents, which will be detailed in a companion paper on the Denario research pipeline \citep{bolliet2025denario}.
+\textbf{Parallel Science} proposes a resolution: a \emph{parallel} scientific publication space that mirrors the structure of the human literature---with preprints, stable identifiers, categories, versioning, and open access---but is explicitly designated as the output of AI research agents. This parallel space operates alongside the human arXiv, not as a replacement but as a complement. Human scientists can browse, cite, and build upon AI-generated work; AI agents can, in future, access and build upon human-authored papers. The two spaces evolve in parallel, with controlled interaction.
 
-The remainder of the paper is organized as follows. Section~\ref{sec:architecture} describes the overall system architecture and the role of each component. Section~\ref{sec:fleet} details the fleet management and containerization model. Section~\ref{sec:pipeline} traces the end-to-end data flow from research task to published paper. Section~\ref{sec:publication} describes the publication infrastructure. Section~\ref{sec:dashboard} presents the monitoring and cost-tracking dashboard. Section~\ref{sec:deployment} covers the deployment model. Section~\ref{sec:results} reports on early operational experience. Section~\ref{sec:discussion} discusses limitations and future directions.
+The concrete realization of this idea is \texttt{papers.parallelscience.org}, a preprint repository modeled on the arXiv that we call \textbf{Parallel ArXiv}. It is populated by a fleet of autonomous AI scientists that run continuously, producing and publishing research papers under human supervision.
+
+This paper describes the infrastructure. Section~\ref{sec:vision} articulates the vision of parallel scientific spaces. Section~\ref{sec:parallel_arxiv} describes the Parallel ArXiv publication system in detail. Section~\ref{sec:fleet} presents the fleet of AI scientists that populates it. Section~\ref{sec:pipeline} traces the data flow from research task to indexed preprint. Section~\ref{sec:dashboard} covers monitoring and cost transparency. Section~\ref{sec:results} reports on early operations. Section~\ref{sec:discussion} discusses implications and future directions.
 
 
-\section{System Architecture}
-\label{sec:architecture}
+\section{Parallel Scientific Spaces}
+\label{sec:vision}
 
-Parallel Science is composed of five interconnected open-source projects arranged in a dependency chain:
+The central idea of Parallel Science is the separation of human-authored and machine-generated scientific literature into distinct but interacting publication spaces.
 
-\begin{equation*}
-\text{AG2} \;\longrightarrow\; \text{CMBAgent} \;\longrightarrow\; \text{Denario} \;\longrightarrow\; \text{Fleet (Docker)} \;\longrightarrow\; \text{OpenClaw}
-\end{equation*}
+\subsection{Why separation?}
 
-with a publication layer (Parallel ArXiv) operating independently. We describe each component's role in the infrastructure; implementation details of the research pipeline itself are deferred to the companion paper.
-
-\subsection{Multi-agent orchestration: AG2}
-\label{sec:ag2}
-
-At the foundation of the stack is AG2 \citep{ag2_2024}, a multi-agent orchestration framework evolved from Microsoft's AutoGen \citep{wu2023autogen}. We maintain a vendored fork published as \texttt{cmbagent\_autogen}. AG2 provides:
-\begin{itemize}
-  \item \textbf{Conversable agents} with configurable system prompts, tool registrations, and LLM backends.
-  \item \textbf{Group chat patterns} including sequential, swarm, and nested chat orchestration.
-  \item \textbf{Multi-provider support} for OpenAI, Anthropic, Google, and other LLM APIs.
-\end{itemize}
-
-AG2 is used directly by CMBAgent for inter-agent communication during the planning and control phases.
-
-\subsection{Research backend: CMBAgent}
-\label{sec:cmbagent}
-
-CMBAgent \citep{bolliet2024cmbagent} is the core research backend that implements a \textbf{two-phase planning-and-control strategy}:
+There are several reasons to maintain distinct spaces:
 
 \begin{enumerate}
-  \item \textbf{Planning phase.} A planner agent, guided by a plan reviewer, iterates to produce a structured execution plan. The plan specifies which specialized agents to invoke, in what order, and with what inputs. The plan is stored in a shared context accessible to all agents.
-  \item \textbf{Control phase.} A controller agent executes the plan step by step. Each subtask is delegated to a specialized agent---an engineer for code generation and execution, a researcher for data analysis, a summarizer for synthesis, or domain-specific agents loaded from configuration.
+  \item \textbf{Provenance clarity.} Readers should know immediately whether a paper was produced by a human researcher, an AI agent, or a collaboration. Mixing the two creates ambiguity that undermines trust in both.
+  \item \textbf{Different evaluation standards.} AI-generated papers are currently not peer-reviewed in the traditional sense. They are produced rapidly and at scale. Appropriate quality metrics for this literature are still being developed. A separate space allows these standards to evolve without distorting the norms of human-authored publication.
+  \item \textbf{Transparency of capabilities.} A dedicated repository of AI-generated research provides a public record of what autonomous systems can and cannot do. This is valuable for AI safety research, for calibrating expectations, and for identifying areas where machine capabilities are advancing.
+  \item \textbf{Scale mismatch.} A fleet of AI agents can produce papers orders of magnitude faster than human researchers. Injecting this volume into the existing literature would overwhelm curation systems designed for human-scale production.
 \end{enumerate}
 
-Each agent is defined by a Python implementation paired with a YAML configuration file, making it straightforward to add new specialized agents for different domains. CMBAgent is domain-agnostic by design; domain specificity enters through agent configuration and available data.
+\subsection{Why interaction?}
 
-\subsection{Research pipeline: Denario}
-\label{sec:denario}
+Separation does not mean isolation. The parallel spaces are designed to interact:
 
-Denario \citep{bolliet2025denario} is a scientific research assistant built on top of CMBAgent. It implements the full research workflow---from exploratory data analysis to paper writing---using a dual-backend architecture that selects between CMBAgent (for complex reasoning tasks such as code execution and analysis) and LangGraph \citep{langgraph} (for faster structured generation tasks such as idea and method formulation). The details of Denario's research methodology are the subject of a companion paper; here we note only that it exposes its capabilities through a \textbf{Model Context Protocol (MCP) server} \citep{mcp2024} with 13 tool endpoints that can be invoked by the messaging gateway.
+\begin{itemize}
+  \item \textbf{Human access to AI work.} AI-generated papers are openly accessible, citable, and browsable. A human researcher studying damped oscillators can find and reference an AI-generated analysis of the same system.
+  \item \textbf{AI access to human work.} Future extensions will enable AI agents to retrieve and build upon human-authored papers, creating a feedback loop between the two literatures.
+  \item \textbf{Shared standards.} The parallel space adopts arXiv conventions---identifier format, category taxonomy, versioning---so that papers from both spaces can be discussed using common infrastructure.
+  \item \textbf{Migration path.} Particularly valuable AI-generated results could, after human review, be submitted to the human literature. The parallel space serves as a staging ground.
+\end{itemize}
 
-\subsection{Messaging gateway: OpenClaw}
-\label{sec:openclaw}
 
-Each autonomous scientist is fronted by an OpenClaw gateway instance---a multi-channel messaging platform supporting over 20 communication channels including Slack, WhatsApp, Telegram, and Discord. OpenClaw serves two roles in the architecture:
+\section{Parallel ArXiv}
+\label{sec:parallel_arxiv}
+
+The Parallel ArXiv is a preprint repository deployed at \texttt{papers.parallelscience.org}. It is implemented as a Flask application running on Google Cloud Run, backed by a SQLite database with Google Cloud Storage for persistence and PDF hosting.
+
+\subsection{Design principles}
+
+The system is designed around three principles:
 
 \begin{enumerate}
-  \item \textbf{Human--agent interface.} Supervisors interact with their assigned scientists through familiar messaging platforms. The gateway handles message routing, threading, file uploads, and streaming responses.
-  \item \textbf{Tool orchestration.} When a research request arrives, the gateway invokes Denario's MCP tools to trigger pipeline steps. Long-running operations (which may take minutes to hours) are managed asynchronously, with status updates streamed back to the supervisor.
+  \item \textbf{ArXiv compatibility.} Papers receive identifiers in arXiv format (\texttt{PX:YYMM.NNNNN}), are classified into the standard arXiv category taxonomy, and are served with abstract pages, PDF links, and BibTeX entries. The ``PX'' prefix distinguishes Parallel ArXiv identifiers from arXiv identifiers.
+  \item \textbf{Immutability of record.} Once a paper receives an identifier, that identifier is permanent. Content updates create new versions under the same identifier; previous versions and their PDFs are preserved indefinitely.
+  \item \textbf{Automatic ingestion.} Papers are indexed automatically when published by AI scientists, with no manual curation step. Two ingestion pathways (real-time webhook and daily batch scrape) ensure completeness and resilience.
 \end{enumerate}
 
-OpenClaw's plugin architecture ensures that adding new communication channels does not require modifications to the core gateway or the research pipeline.
+\subsection{Identifier scheme and versioning}
 
+The identifier format \texttt{PX:YYMM.NNNNN} (e.g., \texttt{PX:2604.00001} for the first paper indexed in April 2026) is maintained by an append-only registry mapping repository names to identifiers. An ID sequence table provides $O(1)$ allocation of the next available number within each month.
 
-\section{Fleet Management}
-\label{sec:fleet}
+Content changes are detected by computing a SHA-256 hash of the paper's title, author, abstract, and categories. When the hash changes, a new version is created: the previous version's \texttt{is\_current} flag is cleared, and the new version is inserted with an incremented version number. This prevents spurious version bumps when a GitHub Pages site is rebuilt without content changes.
 
-A central design decision in Parallel Science is that each autonomous scientist runs as an \textbf{isolated Docker container} with its own resources, model configuration, workspace, and communication channel. The fleet management layer handles container orchestration, configuration generation, and lifecycle management.
+\subsection{Category classification}
 
-\subsection{Configuration}
-\label{sec:config}
-
-The fleet is configured through a single Python file (\texttt{config.py}) that serves as the source of truth for:
-
-\begin{itemize}
-  \item The number of scientists (default: 12).
-  \item The default LLM model and per-scientist overrides. The current fleet uses MiniMax-M2.7 \citep{minimax2025} as the default, with selected scientists running Claude Sonnet 4.6 \citep{anthropic2025claude}.
-  \item Resource allocation per scientist: CPU count, memory limit, and optional GPU assignment.
-  \item Port allocation for gateway and bridge endpoints.
-  \item Per-scientist parameter overrides for the research pipeline (model selection, timeouts, hardware constraints).
-\end{itemize}
-
-A setup script (\texttt{setup.py}) reads this configuration and dynamically generates a Docker Compose file, per-scientist configuration directories, and environment variable mappings.
-
-\subsection{Container architecture}
-\label{sec:container}
-
-Each scientist container is built from a multi-stage Dockerfile that produces a runtime image containing:
-
-\begin{itemize}
-  \item A Node.js runtime running the OpenClaw gateway.
-  \item A Python 3.12 virtual environment with the full AG2--CMBAgent--Denario stack installed from source.
-  \item A \LaTeX{} distribution for paper compilation.
-  \item Git and the GitHub CLI for version-controlled publishing.
-\end{itemize}
-
-On startup, an entrypoint script installs system prompt files (defining the agent's identity and operating instructions), patches the MCP server configuration with container-specific API keys, configures Git authentication, and launches the gateway.
-
-\subsection{Isolation and shared resources}
-\label{sec:isolation}
-
-Each scientist has isolated volumes for configuration, workspace, and work output. A shared read-only data volume provides common datasets, and a shared tools volume provides utility scripts (e.g., the GitHub Pages builder). This design ensures that scientists cannot interfere with each other's state while sharing access to common resources.
-
-Resource limits are enforced through Docker cgroup constraints. The current fleet allocates between 2 and 32 CPUs and between 2\,GB and 64\,GB of RAM per scientist, with one scientist having access to an NVIDIA RTX PRO 6000 Blackwell GPU (96\,GB VRAM) for computationally intensive tasks.
-
-\subsection{Agent identity and instructions}
-\label{sec:identity}
-
-Each scientist's behavior is governed by two instruction files installed at startup:
-
-\begin{itemize}
-  \item A \textbf{system prompt} (\texttt{SOUL.md}) defining the agent's identity as an autonomous research scientist, specifying the research pipeline workflow, reporting requirements, error handling procedures, and the critical rule that no pipeline step may begin without supervisor permission (unless explicitly waived).
-  \item \textbf{Standing instructions} (\texttt{AGENTS.md}) providing operational guidance: tool usage notes, container resource awareness, Git workflow, cancellation handling, and memory management.
-\end{itemize}
-
-These files are version-controlled and shared across the fleet, ensuring consistent behavior while allowing per-scientist configuration overrides for model selection and resource constraints.
-
-
-\section{Research Pipeline: End-to-End Data Flow}
-\label{sec:pipeline}
-
-The complete data flow from a research task to a published paper proceeds through the following stages:
+Papers are classified into the standard arXiv taxonomy using a two-step hierarchical approach:
 
 \begin{enumerate}
-  \item \textbf{Task assignment.} A human supervisor sends a research task to a scientist via a messaging channel (e.g., Slack). The message is routed through the OpenClaw gateway to the agent runtime.
-
-  \item \textbf{Project setup.} The agent calls \texttt{denario\_setup}, which initializes a project directory structure, writes a data description, creates a GitHub repository in the \texttt{ParallelScience} organization, and pushes an initial commit.
-
-  \item \textbf{Pipeline execution.} The agent executes the research pipeline step by step: exploratory data analysis, idea generation, methodology design, computational analysis, and evaluation. Each step invokes a Denario MCP tool, which delegates to the appropriate backend (CMBAgent or LangGraph). After each step, the agent uploads the output file to the messaging channel, reports a summary, and waits for supervisor permission to proceed.
-
-  \item \textbf{Iterative refinement.} The evaluation step assesses the quality of results and may trigger additional iterations. In each iteration, the evaluator generates feedback that informs the next round of methodology and analysis. The system supports configurable maximum iteration counts.
-
-  \item \textbf{Paper generation.} When the evaluator determines that results are satisfactory (or the maximum iteration count is reached), the agent generates a \LaTeX{} paper, compiles it to PDF, and commits both to the repository.
-
-  \item \textbf{Classification.} A two-step hierarchical classifier assigns the paper to arXiv categories. First, an LLM selects a top-level archive (e.g., \texttt{physics}, \texttt{astro-ph}) from 21 standard archives. Then, conditioned on the archive, a second LLM selects a primary subcategory and up to three secondary categories from the full arXiv taxonomy. Classification never falls back to defaults---if the classifier returns an invalid category, it raises an error and the agent must retry.
-
-  \item \textbf{Publication.} The agent builds a GitHub Pages site from the paper, updates the repository README with metadata, enables GitHub Pages, and pushes the final commit.
-
-  \item \textbf{Indexing.} A GitHub webhook fires on the \texttt{page\_build} event, notifying the Parallel ArXiv service. The service scrapes the Pages site, assigns a stable identifier, and indexes the paper in its database. The paper is live within approximately 60--90 seconds of the push.
+  \item \textbf{Archive selection.} An LLM reads the paper's title and abstract and selects one of 21 top-level archives (e.g., \texttt{physics}, \texttt{astro-ph}, \texttt{cs}).
+  \item \textbf{Subcategory assignment.} Conditioned on the selected archive, a second LLM reads the title, abstract, and methods section and assigns a primary subcategory (e.g., \texttt{physics.flu-dyn}) and up to three secondary categories for cross-listing.
 \end{enumerate}
 
-Every step produces a Git commit with a descriptive message, creating a complete provenance trail. If any Git operation fails, the research pipeline continues---commits accumulate locally and are pushed when connectivity is restored.
-
-
-\section{Publication Infrastructure: Parallel ArXiv}
-\label{sec:publication}
-
-To provide a unified view of all research output, we operate \textbf{Parallel ArXiv}, a paper listing service modeled on the arXiv preprint server. It is deployed as a Flask application on Google Cloud Run and serves papers at \texttt{papers.parallelscience.org}.
-
-\subsection{Identifier scheme}
-
-Papers receive identifiers in arXiv format: \texttt{PX:YYMM.NNNNN} (e.g., \texttt{PX:2604.00001} for the first paper indexed in April 2026). Identifiers are assigned by an append-only registry that maps repository names to PX IDs. Once assigned, an identifier never changes, even if the paper content is updated.
-
-\subsection{Version tracking}
-
-When a paper's content changes (detected via SHA-256 hash of title, author, abstract, and categories), a new version is created under the same identifier. Previous versions and their PDFs are preserved. The abstract page displays the full submission history with links to each version.
+Both steps validate outputs against the taxonomy. Invalid categories raise errors rather than falling back to defaults, ensuring classification integrity.
 
 \subsection{Database and storage}
 
-The paper database is a SQLite file with three tables: an ID registry (append-only), an ID sequence (for $O(1)$ allocation), and a papers table storing every version. The database is stored in Google Cloud Storage and downloaded to the container on cold start. After webhook-triggered writes, it is synced back to GCS. PDFs are stored in the same GCS bucket and served directly.
+The paper database is a SQLite file with three tables:
 
-\subsection{Ingestion}
+\begin{itemize}
+  \item \textbf{ID registry}: append-only mapping from repository to PX identifier.
+  \item \textbf{ID sequence}: next available number per year-month, enabling $O(1)$ allocation.
+  \item \textbf{Papers}: every version of every paper, with \texttt{is\_current = 1} marking the latest.
+\end{itemize}
 
-Two ingestion pathways ensure completeness:
+The database is stored in a Google Cloud Storage bucket (\texttt{parallel-arxiv-pdfs}) and downloaded to the container on cold start. After webhook-triggered writes, it is synced back to GCS. PDFs are stored in the same bucket and served directly. The database is compact: approximately 2\,KB per paper at current schema.
 
-\begin{enumerate}
-  \item \textbf{Real-time webhook.} An organization-level GitHub webhook fires \texttt{page\_build} events to the Parallel ArXiv endpoint. The handler validates the HMAC signature, scrapes the repository's GitHub Pages site, and upserts the paper. This provides near-real-time indexing.
-  \item \textbf{Daily scrape.} A safety-net cron job scrapes all repositories in the organization, performing idempotent upserts. Content hashing prevents spurious version bumps when pages are rebuilt without content changes.
-\end{enumerate}
+\subsection{Ingestion pathways}
+
+\paragraph{Real-time webhook.} An organization-level GitHub webhook fires \texttt{page\_build} events whenever a scientist publishes a paper to GitHub Pages. The Parallel ArXiv endpoint validates the HMAC signature, scrapes the repository's Pages site for metadata (title, author, abstract, date, categories), downloads the PDF, assigns or looks up the PX identifier, and upserts the paper. The complete pipeline from push to live listing takes approximately 60--90 seconds.
+
+\paragraph{Daily batch scrape.} A safety-net cron job scrapes all repositories in the GitHub organization, performing idempotent upserts. Content hashing ensures that unchanged papers are not re-versioned.
 
 \subsection{Pages and routes}
 
-The service provides category listings (new submissions with full abstracts, recent submissions with titles and authors), individual abstract pages with version history, PDF serving, BibTeX generation, archive landing pages, and author pages.
+The service provides:
+\begin{itemize}
+  \item Category listings with full abstracts (\texttt{/list/<category>/new}) and compact views (\texttt{/list/<category>/recent}).
+  \item Abstract pages with version history and BibTeX modal (\texttt{/abs/<px\_id>}).
+  \item Versioned PDF access (\texttt{/pdf/<px\_id>v<N>}).
+  \item Archive landing pages showing active categories (\texttt{/archive/<archive>}).
+  \item Author pages aggregating papers by contributor (\texttt{/author/<name>}).
+\end{itemize}
 
 
-\section{Dashboard: Mission Control}
+\section{Fleet of AI Scientists}
+\label{sec:fleet}
+
+The Parallel ArXiv is populated by a fleet of autonomous AI research agents, each running as an isolated Docker container. The fleet management layer handles configuration, orchestration, and lifecycle management.
+
+\subsection{Architecture overview}
+
+The software stack within each scientist container comprises four layers:
+
+\begin{enumerate}
+  \item \textbf{AG2} \citep{ag2_2024,wu2023autogen}: a multi-agent orchestration framework providing conversable agents, group chat patterns, and multi-provider LLM support.
+  \item \textbf{CMBAgent} \citep{bolliet2024cmbagent}: a research backend implementing a two-phase planning-and-control strategy, where a planner agent designs an execution plan and a controller agent delegates subtasks to specialized agents (engineer, researcher, summarizer).
+  \item \textbf{Denario} \citep{bolliet2025denario}: a research pipeline built on CMBAgent with a dual-backend architecture (CMBAgent for complex reasoning, LangGraph \citep{langgraph} for structured generation). It exposes 13 tool endpoints via a Model Context Protocol (MCP) server \citep{mcp2024}. The design of the research pipeline is the subject of a companion paper.
+  \item \textbf{OpenClaw}: a multi-channel messaging gateway supporting over 20 communication channels (Slack, Telegram, Discord, etc.) that routes messages between human supervisors and the Denario MCP server.
+\end{enumerate}
+
+\subsection{Fleet configuration}
+
+The fleet is configured through a single Python file specifying:
+\begin{itemize}
+  \item Number of scientists (currently 12).
+  \item Default LLM model and per-scientist overrides (currently MiniMax-M2.7 \citep{minimax2025} as default, with Claude Sonnet 4.6 \citep{anthropic2025claude} for selected scientists).
+  \item Resource allocation: CPU, memory, and optional GPU per scientist.
+  \item Per-scientist research pipeline parameters (timeouts, iteration limits, model selection per pipeline stage).
+\end{itemize}
+
+A setup script reads this configuration and generates a Docker Compose file, per-scientist directories, and environment variable mappings. Each scientist has isolated volumes for configuration, workspace, and output, with shared read-only access to common datasets and tools.
+
+\subsection{Agent identity}
+
+Each scientist's behavior is governed by a system prompt defining its identity as an autonomous research scientist, its workflow (the step-by-step research pipeline), and a critical operating rule: \emph{no pipeline step may begin without reporting the results of the current step and receiving explicit supervisor permission}. This ensures that human oversight is maintained at every stage of research production, and that the supervisor can redirect, pause, or terminate work at any point.
+
+
+\section{End-to-End Data Flow}
+\label{sec:pipeline}
+
+The complete path from research task to indexed preprint proceeds as follows:
+
+\begin{enumerate}
+  \item A human supervisor assigns a research task via a messaging channel.
+  \item The agent initializes a project: creates a directory structure, writes a data description, creates a GitHub repository, and pushes an initial commit.
+  \item The agent executes the research pipeline step by step (exploratory data analysis, idea generation, methodology, computation, evaluation), uploading output files and summaries to the messaging channel after each step and waiting for supervisor approval.
+  \item The evaluation step may trigger iterative refinement, where feedback informs updated methodology and recomputation.
+  \item Upon completion, the agent generates a \LaTeX{} paper, compiles it to PDF, classifies it into arXiv categories, and commits both to the repository.
+  \item The agent builds a GitHub Pages site, updates the repository README, enables Pages, and pushes the final commit.
+  \item The GitHub webhook notifies Parallel ArXiv, which scrapes the Pages site, assigns a PX identifier, and indexes the paper. The paper is live within 60--90 seconds.
+\end{enumerate}
+
+Every step produces a Git commit with a descriptive message. If any Git operation fails, the pipeline continues---commits accumulate locally and are pushed when connectivity is restored. The full provenance of any paper is recoverable from its Git history.
+
+
+\section{Monitoring and Cost Transparency}
 \label{sec:dashboard}
 
-A real-time monitoring dashboard (``Mission Control'') provides fleet-wide visibility. A collector process polls Docker containers and scans project directories every 10 seconds, aggregating:
+A real-time monitoring dashboard (``Mission Control'', accessible at \texttt{dashboard.parallelscience.org}) polls the fleet every 10 seconds, providing:
 
 \begin{itemize}
-  \item \textbf{Container status}: running, idle, busy (detected via MCP log recency and CPU usage).
-  \item \textbf{Resource usage}: memory consumption and CPU utilization per scientist.
-  \item \textbf{Pipeline progress}: per-project progress through the research pipeline stages (EDA, Idea, Literature, Methods, Results, Paper), displayed as a progress bar.
-  \item \textbf{Cost tracking}: per-stage, per-iteration cost aggregated from LLM API call logs. Costs are extracted from three sources: pipeline log files, CMBAgent JSON cost reports, and EDA/analysis comparison reports.
-  \item \textbf{Paper inventory}: titles, scientists, dates, and total project costs for completed papers.
+  \item Container status (running, idle, busy) detected via MCP log recency and CPU usage.
+  \item Per-scientist resource consumption (memory, CPU).
+  \item Per-project pipeline progress displayed as a stage-by-stage progress bar.
+  \item Per-stage, per-iteration cost aggregated from LLM API call logs.
+  \item An inventory of completed papers with titles, dates, and total project costs.
 \end{itemize}
 
-The dashboard is served as a static site accessible via Tailscale at \texttt{dashboard.parallelscience.org}.
-
-
-\section{Deployment}
-\label{sec:deployment}
-
-The system is deployed across two environments:
-
-\begin{itemize}
-  \item \textbf{On-premise server (Orion).} The scientist fleet, dashboard, and messaging gateways run on a dedicated server equipped with an AMD Ryzen Threadripper PRO 9995WX processor and an NVIDIA RTX PRO 6000 Blackwell GPU. Public access is provided through Tailscale Funnel for the dashboard and selected scientist UIs.
-  \item \textbf{Google Cloud Platform.} The Parallel ArXiv paper listing service and the project landing page are deployed on Cloud Run. Paper PDFs and the database are stored in Google Cloud Storage.
-\end{itemize}
-
-Communication between the fleet and external services uses outbound connections only: Slack Socket Mode (outbound WebSocket), GitHub API calls, and GCS uploads. No inbound ports need to be exposed for the core research pipeline.
+Cost transparency is a design priority. Every LLM API call is logged with its cost, enabling fine-grained analysis of where research budgets are spent and informing model selection decisions.
 
 
 \section{Early Operational Experience}
 \label{sec:results}
 
-The system has been operational since April 2026 with a fleet of 12 scientists. We report on the first days of operation.
+The system has been operational since April 2026 with 12 scientists. We report on the first days of operation.
 
-\subsection{Paper production}
+\subsection{Paper production and cost}
 
-Within the first three days, the fleet produced its first set of papers on topics including damped harmonic oscillator dynamics and economics. These papers were automatically published to GitHub, indexed on Parallel ArXiv with PX identifiers, and made available with full abstract pages, PDFs, and BibTeX entries.
-
-\subsection{Cost}
-
-Research costs are dominated by LLM API calls. Representative per-paper costs for early projects were \$0.61 (4 iterations on damped oscillator dynamics) and \$0.81 (4 iterations on an economics problem), with the paper-writing stage accounting for approximately half of the total cost. These figures reflect the use of cost-efficient models (MiniMax-M2.7) for the bulk of the pipeline.
+The fleet produced its first papers within three days on topics including damped harmonic oscillator dynamics and economics. Representative per-paper costs were \$0.61 (4 iterations, physics) and \$0.81 (4 iterations, economics), with paper writing accounting for approximately half the total cost. These figures reflect the use of MiniMax-M2.7 for the bulk of the pipeline. Papers were automatically published to GitHub Pages, indexed on Parallel ArXiv with PX identifiers, and made available with abstract pages, versioned PDFs, and BibTeX entries.
 
 \subsection{Model diversity}
 
-The fleet currently uses two model families: MiniMax-M2.7 as the default for most scientists, and Anthropic Claude Sonnet 4.6 for selected scientists requiring stronger reasoning capabilities. The per-scientist model override mechanism allows A/B testing of model performance on identical tasks.
+The per-scientist model override mechanism enables comparison of different LLMs on identical tasks. The current fleet uses two model families (MiniMax-M2.7 and Claude Sonnet 4.6), with plans to expand to additional providers as the system scales.
 
-\subsection{Human interaction patterns}
+\subsection{Supervision patterns}
 
-In the default interactive mode, supervisors approve each pipeline step before the agent proceeds. This has proven effective for quality control while maintaining high throughput---a supervisor can oversee multiple scientists simultaneously, reviewing outputs as they arrive in Slack. A ``full pipeline'' mode is available for trusted, well-understood tasks, in which the agent runs all steps autonomously with status updates between each.
+In default interactive mode, supervisors approve each pipeline step, reviewing uploaded output files before granting permission to proceed. A single supervisor can oversee multiple scientists simultaneously. For well-understood tasks, a ``full pipeline'' mode allows autonomous execution with status updates between steps.
 
 
 \section{Discussion}
 \label{sec:discussion}
 
-\subsection{Limitations}
+\subsection{A growing parallel literature}
 
-The current system has several limitations that inform future development:
+If AI scientists continue to operate and improve, the Parallel ArXiv will accumulate a growing body of machine-generated scientific literature. This corpus has several potential uses:
 
 \begin{itemize}
-  \item \textbf{Data dependency.} The research pipeline requires a structured data description as input. The system cannot yet autonomously acquire or curate datasets from external sources.
-  \item \textbf{Domain breadth.} While the architecture is domain-agnostic, operational experience has so far been concentrated in physics and economics. Scaling to experimental sciences, biology, or engineering will require additional specialized agents and tool integrations.
-  \item \textbf{Evaluation quality.} The automated evaluator is an LLM-based critic. Its assessments, while useful for guiding iteration, do not substitute for expert peer review. The publication infrastructure currently has no peer review mechanism.
-  \item \textbf{Single-server deployment.} The fleet runs on a single server. Horizontal scaling across multiple machines would require distributed container orchestration (e.g., Kubernetes).
+  \item \textbf{Benchmarking AI research capabilities.} The repository provides a public, timestamped record of what autonomous systems can produce, enabling longitudinal studies of capability.
+  \item \textbf{Training signal.} The corpus of successful (and unsuccessful) research attempts, with full provenance, could serve as training data for future research agents.
+  \item \textbf{Complementary exploration.} AI agents can explore research directions that human researchers deprioritize due to perceived low impact or high effort, potentially uncovering overlooked phenomena.
+  \item \textbf{Reproducibility resource.} Every paper in the parallel space has a complete computational provenance trail (code, data, intermediate results) in its Git history---a level of reproducibility rarely achieved in human-authored literature.
 \end{itemize}
 
-\subsection{Future directions}
+\subsection{Toward interaction between spaces}
 
-Several extensions are planned or under development:
+The current system is one-directional: AI agents produce papers that humans can read. Full co-evolution requires bidirectional interaction:
 
 \begin{itemize}
-  \item \textbf{Inter-agent collaboration.} Currently, scientists operate independently. Enabling agents to read each other's papers, build on previous results, and propose collaborative projects would create a richer research ecosystem.
-  \item \textbf{Autonomous data acquisition.} Connecting agents to public data repositories, APIs, and databases would enable them to identify and retrieve relevant datasets without human intervention.
-  \item \textbf{Community peer review.} Integrating a review mechanism---whether human, AI-assisted, or hybrid---into the publication pipeline would improve quality control.
-  \item \textbf{Federated deployment.} Supporting multi-site deployments where different institutions contribute scientists to a shared research effort.
+  \item \textbf{AI agents reading human literature.} Connecting agents to the arXiv API and semantic search tools would enable them to situate their work in the context of existing human research, reducing redundancy and improving relevance.
+  \item \textbf{Cross-citation.} Establishing citation practices between the two spaces---with clear provenance markers---would formalize the interaction and enable bibliometric analysis of human--AI knowledge flow.
+  \item \textbf{Collaborative authorship.} Papers could be initiated by AI agents and refined by human researchers (or vice versa), with the publication space determined by the degree of human involvement.
+  \item \textbf{Review and curation.} Community mechanisms for rating, reviewing, or flagging AI-generated papers would help surface high-quality work and identify failure modes.
+\end{itemize}
+
+\subsection{Limitations}
+
+The current system has several limitations:
+
+\begin{itemize}
+  \item \textbf{No peer review.} Papers are published without external review. Quality depends on the research pipeline and human supervision at the step level, not on post-hoc evaluation.
+  \item \textbf{Data dependency.} The pipeline requires structured data descriptions as input. Autonomous data acquisition and curation are not yet supported.
+  \item \textbf{Narrow operational experience.} Early papers have been concentrated in physics and economics. The extent to which the infrastructure generalizes to experimental sciences, biology, or engineering is untested.
+  \item \textbf{Single-server deployment.} The fleet runs on one server. Scaling to multiple sites would require distributed orchestration.
+  \item \textbf{Evaluation quality.} The automated evaluator that guides iteration is an LLM-based critic whose judgments, while useful, do not substitute for domain expertise.
+\end{itemize}
+
+\subsection{Ethical considerations}
+
+Operating autonomous scientific agents raises questions that we flag without claiming to resolve:
+
+\begin{itemize}
+  \item \textbf{Attribution.} How should AI-generated work be cited? We use ``Denario'' as the author name, making the provenance explicit, but community norms are still forming.
+  \item \textbf{Quality assurance.} Publishing AI-generated papers at scale risks polluting the scientific record with low-quality or incorrect work. The separate publication space mitigates but does not eliminate this risk.
+  \item \textbf{Resource allocation.} Continuous operation of AI research agents consumes energy and API costs. The modest per-paper costs reported here (\$0.61--\$0.81) suggest this is economically viable, but environmental and social costs merit consideration as scale increases.
 \end{itemize}
 
 
 \section{Conclusion}
 \label{sec:conclusion}
 
-We have described Parallel Science, an open infrastructure for continuous, parallel, human-supervised AI research. The system demonstrates that it is technically feasible to operate fleets of autonomous scientists that execute full research cycles---from hypothesis to published paper---at modest cost and under human oversight. The key enabler is the integration of multi-agent orchestration, containerized isolation, standard messaging interfaces, and automated publication into a coherent pipeline where every step is version-controlled and transparent.
+We have described Parallel Science, an open infrastructure that establishes a dedicated publication space for AI-generated scientific research. The system's central contribution is not any individual AI capability but the \emph{institutional infrastructure} that makes continuous, parallel, human-supervised AI research publishable, citable, and transparent.
 
-The infrastructure is open source and operational. Papers produced by the system are publicly available at \texttt{papers.parallelscience.org}. We hope that Parallel Science contributes to a future in which human and artificial scientists work in parallel, each amplifying the other's capabilities in the pursuit of scientific understanding.
+The Parallel ArXiv at \texttt{papers.parallelscience.org} provides the same affordances as the human arXiv---stable identifiers, versioning, category classification, open access---while maintaining a clear separation between human-authored and machine-generated work. The fleet of AI scientists that populates it demonstrates that autonomous research production is technically feasible and economically viable at current model costs.
+
+We envision a future in which human and artificial scientists maintain parallel literatures that interact and inform each other---a co-evolution in which human intuition guides machine exploration, machine speed extends human reach, and both are enriched by the exchange. Parallel Science is a first step toward that future.
+
+The infrastructure is open source and the paper repository is publicly accessible at \texttt{papers.parallelscience.org}.
 
 
 \acknowledgments
 
-We acknowledge the use of large language models (Claude, GPT, Gemini, MiniMax) as components of the research infrastructure described in this paper. The Parallel Science project is built on open-source software including AG2, LangGraph, Flask, and OpenClaw. We thank the developers of these projects.
+We acknowledge the use of large language models (Claude, GPT, Gemini, MiniMax) as components of the research infrastructure described in this paper. The Parallel Science project builds on open-source software including AG2, LangGraph, Flask, and OpenClaw. We thank the developers of these projects.
 
 
 \bibliographystyle{unsrtnat}
