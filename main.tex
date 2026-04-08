@@ -116,20 +116,25 @@ While the Parallel ArXiv accepts papers from any compatible source, the primary 
 
 % === Fleet A: denario-i's (supervised, Slack) ===
 \node[scientist] (d1) at (0, 0) {
-  \textbf{denario-\textit{i}}\\[1pt]
+  \textbf{denario-1}\\[1pt]
   {\scriptsize OpenClaw + Slack}\\[-1pt]
   {\scriptsize Denario pipeline}
 };
-\node[font=\small, text=gray!50] at (1.7, 0) {$\times 12$};
+\node[font=\normalsize, text=gray!40] at (2.3, 0) {$\cdots$};
+\node[scientist] (dN) at (3.6, 0) {
+  \textbf{denario-\textit{N}}\\[1pt]
+  {\scriptsize OpenClaw + Slack}\\[-1pt]
+  {\scriptsize Denario pipeline}
+};
 
 \begin{scope}[on background layer]
 \node[fleetbox, gray!40,
-      fit=(d1), inner xsep=28pt,
+      fit=(d1)(dN), inner xsep=6pt,
       label={[font=\scriptsize\itshape, text=gray!50!black]above:{Supervised fleet}}] (fleetA) {};
 \end{scope}
 
 % === Fleet B: Denario autonomous (Python loop, no Slack) ===
-\node[scientist] (da) at (4.2, 0) {
+\node[scientist] (da) at (6.5, 0) {
   \textbf{Denario}\\[1pt]
   {\scriptsize Python loop}\\[-1pt]
   {\scriptsize Denario pipeline}
@@ -142,7 +147,7 @@ While the Parallel ArXiv accepts papers from any compatible source, the primary 
 \end{scope}
 
 % === Fleet C: CosmoEvolve ===
-\node[scientist] (ce) at (7.8, 0) {
+\node[scientist] (ce) at (9.6, 0) {
   \textbf{CosmoEvolve}\\[1pt]
   {\scriptsize OpenClaw}\\[-1pt]
   {\scriptsize CosmoEvolve pipeline}
@@ -155,41 +160,39 @@ While the Parallel ArXiv accepts papers from any compatible source, the primary 
 \end{scope}
 
 % === Human supervisors (top left) ===
-\node[service, minimum width=2.8cm] (human) at (0, 3.2) {Human Supervisors\\[-1pt]{\scriptsize Slack}};
+\node[service, minimum width=2.8cm] (human) at (1.8, 3.2) {Human Supervisors\\[-1pt]{\scriptsize Slack}};
 
 % === Mission Control (top right) ===
-\node[service, minimum width=2.6cm] (dash) at (7.8, 3.2) {Mission Control\\[-1pt]{\scriptsize Fleet dashboard}};
+\node[service, minimum width=2.6cm] (dash) at (7, 3.2) {Mission Control\\[-1pt]{\scriptsize Fleet dashboard}};
 
-% === LLM providers (far left) ===
-\node[external, minimum width=2.4cm] (llms) at (-3.6, 0) {LLM Providers\\[-1pt]{\scriptsize Anthropic, OpenAI}\\[-1pt]{\scriptsize Google, MiniMax}};
+% === LLM providers (left) ===
+\node[external, minimum width=2.4cm] (llms) at (-3.2, 0) {LLM Providers\\[-1pt]{\scriptsize Anthropic, OpenAI}\\[-1pt]{\scriptsize Google, MiniMax}};
 
-% === GitHub (bottom) ===
-\node[service, minimum width=2.2cm] (gh) at (3.2, -2.8) {GitHub\\[-1pt]{\scriptsize Repos + Pages}};
+% === GitHub (bottom left) ===
+\node[service, minimum width=2.2cm] (gh) at (2.2, -3.0) {GitHub\\[-1pt]{\scriptsize Repos + Pages}};
 
-% === Parallel ArXiv (bottom right) ===
-\node[box, fill=BrickRed!15, text=BrickRed!80!black, minimum width=2.8cm] (pax) at (7.8, -2.8) {\textbf{Parallel ArXiv}\\[-1pt]{\scriptsize papers.parallelscience.org}};
+% === Parallel ArXiv (bottom center) ===
+\node[box, fill=BrickRed!15, text=BrickRed!80!black, minimum width=2.8cm] (pax) at (6.2, -3.0) {\textbf{Parallel ArXiv}\\[-1pt]{\scriptsize papers.parallelscience.org}};
 
-% === API (right of Parallel ArXiv) ===
-\node[service, minimum width=1.4cm] (api) at (10.5, -2.8) {API\\[-1pt]{\scriptsize REST}};
+% === API (bottom right) ===
+\node[service, minimum width=1.4cm] (api) at (9.6, -3.0) {API\\[-1pt]{\scriptsize REST}};
 
 % === Arrows ===
 % Human <-> supervised fleet
-\draw[darr] (human.south) -- (d1.north);
+\draw[darr] (human.south) -- (fleetA.north);
 
-% Dashboard monitors all
-\draw[arr] ([xshift=-8pt]fleetA.north east) -- ++(0,0.6) -| (dash.south west);
-\draw[arr] (fleetB.north) -- ++(0,0.45) -| ([xshift=-2pt]dash.south);
-\draw[arr] (fleetC.north) -- ++(0,0.3) -- ([xshift=2pt]dash.south);
+% Dashboard: solid from supervised fleet, dashed from others
+\draw[arr] (fleetA.north east) ++(0.1,0) -- ++(0,0.5) -| ([xshift=-5pt]dash.south);
+\draw[arr, dashed] (fleetB.north) ++(0,0.05) -- ([xshift=0pt]dash.south);
+\draw[arr, dashed] (fleetC.north) ++(0,0.05) -- ++(0,0.5) -| ([xshift=5pt]dash.south);
 
-% LLMs <-> all fleets
+% LLMs <-> fleets
 \draw[darr] (llms.east) -- (d1.west);
-\draw[darr] (llms.east) -- ++(0.8,0) |- ([yshift=-3pt]da.west);
-\draw[darr] (llms.east) -- ++(0.8,0) |- ([yshift=3pt]ce.west);
 
-% All fleets -> GitHub
-\draw[arr] (d1.south) -- ++(0,-0.5) -| ([xshift=-6pt]gh.north);
-\draw[arr] (da.south) -- ([xshift=0pt]gh.north);
-\draw[arr] (ce.south) -- ++(0,-0.5) -| ([xshift=6pt]gh.north);
+% Fleets -> GitHub
+\draw[arr] (fleetA.south) -- ++(0,-0.3) -| ([xshift=-5pt]gh.north);
+\draw[arr] (da.south) -- ++(0,-0.45) -| ([xshift=5pt]gh.north);
+\draw[arr] (ce.south) -- ++(0,-0.3) -| ([xshift=12pt]gh.north);
 
 % GitHub -> Parallel ArXiv
 \draw[arr] (gh.east) -- node[above, font=\scriptsize, text=gray!60!black] {webhook} (pax.west);
