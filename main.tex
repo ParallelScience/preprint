@@ -6,7 +6,7 @@
 Cyber Space for Human--AI Co-Evolution of Science}
 
 \author{
-  Boris Bolliet,$^{1}$\thanks{Corresponding author: \texttt{boris.bolliet@parallelscience.org}. Authors listed in alphabetical order.}
+  Boris Bolliet,$^{1}$\thanks{Authors listed in alphabetical order. Contact: \texttt{boris.bolliet@parallelscience.org}.}
   Thomas Borrett,$^{1}$
   Andy Nilipour,$^{2}$
   Pablo Villanueva-Domingo,$^{3}$\\
@@ -101,49 +101,88 @@ While the Parallel ArXiv accepts papers from any compatible source, the primary 
 
 \begin{figure}[t]
 \centering
-\begin{tikzpicture}[scale=0.88, every node/.style={transform shape},
-  layer/.style={draw, rounded corners=4pt, minimum width=12cm, minimum height=1.1cm, font=\small, text=white, align=center},
-  label/.style={font=\footnotesize\itshape, text=black, anchor=east},
-  arrow/.style={-{Stealth[length=5pt]}, thick, gray},
-  >=Stealth,
+\begin{tikzpicture}[
+  box/.style={draw, rounded corners=3pt, minimum height=0.9cm, font=\small, align=center, thick},
+  service/.style={box, fill=NavyBlue!12, text=NavyBlue!90!black},
+  scientist/.style={box, fill=gray!15, text=black, minimum width=2.5cm, minimum height=2.2cm},
+  external/.style={box, fill=BrickRed!10, text=BrickRed!80!black, dashed},
+  arr/.style={-{Stealth[length=4pt]}, thick, gray!70},
+  darr/.style={arr, {Stealth[length=4pt]}-{Stealth[length=4pt]}},
+  lbl/.style={font=\scriptsize, text=gray!70!black, midway},
 ]
-% Stack layers (bottom to top)
-\node[layer, fill=gray!70!black] (ag2) at (0,0) {\textbf{AG2} --- Multi-agent orchestration framework};
-\node[layer, fill=gray!55!black] (cmb) at (0,1.4) {\textbf{CMBAgent} --- Planning-and-control research backend};
-\node[layer, fill=gray!40!black] (den) at (0,2.8) {\textbf{Denario / CosmoEvolve} --- Research pipelines (MCP server)};
-\node[layer, fill=NavyBlue!80!black] (oc) at (0,4.2) {\textbf{OpenClaw} --- Multi-channel messaging gateway};
-\node[layer, fill=NavyBlue!60!black] (fleet) at (0,5.6) {\textbf{Fleet Manager} --- Docker orchestration, config, monitoring};
 
-% Parallel ArXiv (separate, to the right)
-\node[draw, rounded corners=4pt, minimum width=4.2cm, minimum height=1.1cm, font=\small, fill=BrickRed!70!black, text=white, align=center] (pax) at (7.5,1.4) {\textbf{Parallel ArXiv}\\{\footnotesize papers.parallelscience.org}};
+% --- Scientists (center) ---
+\node[scientist] (s1) at (0, 0) {
+  \textbf{denario-1}\\[1pt]
+  {\scriptsize OpenClaw}\\[-1pt]
+  {\scriptsize Research pipeline}\\[-1pt]
+  {\scriptsize (Denario)}
+};
+\node[scientist] (s2) at (3, 0) {
+  \textbf{denario-3}\\[1pt]
+  {\scriptsize OpenClaw}\\[-1pt]
+  {\scriptsize Research pipeline}\\[-1pt]
+  {\scriptsize (Denario)}
+};
+\node[font=\large, text=gray] at (5.7, 0) {$\cdots$};
+\node[scientist] (s3) at (8, 0) {
+  \textbf{cosmoevolve}\\[1pt]
+  {\scriptsize OpenClaw}\\[-1pt]
+  {\scriptsize Research pipeline}\\[-1pt]
+  {\scriptsize (CosmoEvolve)}
+};
 
-% Arrows between stack layers
-\draw[arrow] (ag2.north) -- (cmb.south);
-\draw[arrow] (cmb.north) -- (den.south);
-\draw[arrow] (den.north) -- (oc.south);
-\draw[arrow] (oc.north) -- (fleet.south);
+% Fleet bounding box
+\begin{scope}[on background layer]
+\node[draw, rounded corners=6pt, dashed, gray!50, thick,
+      fit=(s1)(s2)(s3), inner xsep=12pt, inner ysep=10pt,
+      label={[font=\footnotesize\itshape, text=gray!60!black]above:Fleet of AI Scientists (Docker containers)}] (fleet) {};
+\end{scope}
 
-% Arrow from Denario to Parallel ArXiv (via GitHub)
-\draw[arrow, BrickRed!70!black] (den.east) -- ++(1.2,0) node[midway, above, font=\footnotesize, text=black] {GitHub} -- (pax.west);
+% --- Human supervisors (top) ---
+\node[service, minimum width=3.5cm] (human) at (1.5, 3.4) {Human Supervisors\\[-1pt]{\scriptsize Slack, Telegram, Web UI}};
 
-% Human supervisor
-\node[font=\small, text=black] (human) at (0,7.0) {Human Supervisors \quad / \quad Autonomous Mode};
-\draw[arrow] (human.south) -- (fleet.north);
+% --- Dashboard (top right) ---
+\node[service, minimum width=3.0cm] (dash) at (6.8, 3.4) {Mission Control\\[-1pt]{\scriptsize Fleet dashboard}};
 
-% Labels
-\node[label] at (-6.8,0) {Python};
-\node[label] at (-6.8,1.4) {Python};
-\node[label] at (-6.8,2.8) {Python};
-\node[label] at (-6.8,4.2) {TypeScript};
-\node[label] at (-6.8,5.6) {Docker};
+% --- LLM providers (left) ---
+\node[external, minimum width=2.6cm] (llms) at (-3.5, 0) {LLM Providers\\[-1pt]{\scriptsize Anthropic, OpenAI,}\\[-1pt]{\scriptsize Google, MiniMax, \ldots}};
+
+% --- GitHub (bottom center) ---
+\node[service, minimum width=2.5cm] (gh) at (4, -2.8) {GitHub\\[-1pt]{\scriptsize Repos + Pages}};
+
+% --- Parallel ArXiv (bottom right) ---
+\node[box, fill=BrickRed!15, text=BrickRed!80!black, minimum width=3.0cm] (pax) at (8.5, -2.8) {\textbf{Parallel ArXiv}\\[-1pt]{\scriptsize papers.parallelscience.org}};
+
+% --- Arrows ---
+% Human <-> fleet
+\draw[darr] (human.south) -- ++(0,-0.5) -| (s1.north);
+\draw[darr] (human.south) -- ++(0,-0.5) -| (s2.north);
+
+% Dashboard <- fleet
+\draw[arr] (fleet.north -| dash) -- (dash.south);
+
+% LLMs <-> scientists
+\draw[darr] (llms.east) -- (s1.west);
+
+% Scientists -> GitHub
+\draw[arr] (s1.south) -- ++(0,-0.4) -| (gh.north);
+\draw[arr] (s2.south) -- ++(0,-0.55) -| (gh.north);
+\draw[arr] (s3.south) -- ++(0,-0.4) -| (gh.north);
+
+% GitHub -> Parallel ArXiv
+\draw[arr] (gh.east) -- node[lbl, above] {\scriptsize webhook} (pax.west);
+
 \end{tikzpicture}
-\caption{The Parallel Science software stack. The research pipeline (AG2 through Denario/CosmoEvolve) publishes papers to GitHub, which triggers automatic indexing by the Parallel ArXiv. The publication infrastructure is decoupled from the research stack: any system that publishes to GitHub Pages in the expected format is automatically indexed. Human supervisors interact through the messaging gateway or the fleet operates autonomously.}
-\label{fig:stack}
+\caption{Architecture of the Parallel Science infrastructure. Each scientist runs as an isolated Docker container with a messaging gateway (OpenClaw) and a research pipeline (Denario or CosmoEvolve) that calls external LLM providers. Scientists publish papers to GitHub, which triggers automatic indexing by the Parallel ArXiv via webhook. Human supervisors interact through messaging channels; the fleet can also operate autonomously. Mission Control provides real-time monitoring of the entire fleet.}
+\label{fig:architecture}
 \end{figure}
 
 \subsection{Software stack}
 
-The software stack within each scientist container comprises four layers, illustrated in Figure~\ref{fig:stack}. At the foundation, AG2 \citep{ag2_2024,wu2023autogen} provides multi-agent orchestration with conversable agents, group chat patterns, and multi-provider LLM support. Above it, CMBAgent \citep{bolliet2024cmbagent} implements a two-phase planning-and-control strategy in which a planner agent designs an execution plan and a controller agent delegates subtasks to specialized agents (engineer, researcher, summarizer). The research pipeline layer---currently either Denario \citep{bolliet2025denario} or CosmoEvolve---implements the scientific workflow and exposes it through a Model Context Protocol (MCP) server \citep{mcp2024} with tool endpoints for each pipeline stage. Finally, OpenClaw provides a multi-channel messaging gateway supporting over 20 communication channels (Slack, Telegram, Discord, and others) that routes messages between human supervisors and the MCP server.
+The architecture of each scientist container is illustrated in Figure~\ref{fig:architecture}. The research backend, CMBAgent \citep{bolliet2024cmbagent}, implements a two-phase planning-and-control strategy in which a planner agent designs an execution plan and a controller agent delegates subtasks to specialized agents (engineer, researcher, summarizer). CMBAgent orchestrates agents using AG2 \citep{ag2_2024,wu2023autogen} for multi-agent conversation patterns and LangGraph \citep{langgraph} for structured generation tasks; the two frameworks serve complementary roles within the same pipeline. The research pipeline layer---currently either Denario \citep{bolliet2025denario} or CosmoEvolve---builds on CMBAgent to implement the scientific workflow and exposes it through a Model Context Protocol (MCP) server \citep{mcp2024} with tool endpoints for each pipeline stage. OpenClaw provides a multi-channel messaging gateway supporting over 20 communication channels (Slack, Telegram, Discord, and others) that routes messages between human supervisors and the MCP server.
+
+Each scientist calls multiple LLM providers over the course of a single research project. Different pipeline stages may use different models: for example, a fast model for idea generation, a reasoning-capable model for code writing, and a cost-efficient model for evaluation. The model configuration is specified per pipeline stage in the scientist's parameters, and the infrastructure supports Anthropic, OpenAI, Google, MiniMax, and other providers simultaneously.
 
 The design of the Denario research pipeline, including its dual-backend architecture and iterative refinement loop, is the subject of a companion paper \citep{bolliet2025denario}.
 
@@ -157,9 +196,9 @@ The fleet is configured through a single Python file specifying the number of sc
 \label{tab:fleet}
 \begin{tabular}{@{}llccc@{}}
 \toprule
-Scientist & Model & CPUs & RAM & GPU \\
+Scientist & Default model & CPUs & RAM & GPU \\
 \midrule
-Default (1--2, 4--5) & MiniMax-M2.7 & 4 & 8\,GB & --- \\
+denario-1, 2, 4, 5 & MiniMax-M2.7 & 4 & 8\,GB & --- \\
 denario-3 & Claude Sonnet 4.6 & 32 & 64\,GB & RTX PRO 6000 \\
 denario-6 & Claude Sonnet 4.6 & 8 & 16\,GB & --- \\
 denario-7 through 12 & MiniMax-M2.7 & 2 & 2\,GB & --- \\
@@ -227,7 +266,7 @@ To illustrate the range of research produced by the Parallel Science infrastruct
 \section{Monitoring and Cost Transparency}
 \label{sec:dashboard}
 
-A real-time monitoring dashboard (``Mission Control'', accessible at \href{https://dashboard.parallelscience.org}{dashboard.parallelscience.org}) polls the fleet every 10 seconds, providing container status (running, idle, or busy, detected via MCP log recency and CPU usage), per-scientist resource consumption, per-project pipeline progress displayed as a stage-by-stage progress bar, per-stage per-iteration cost aggregated from LLM API call logs, and an inventory of completed papers with titles, dates, and total project costs.
+A real-time monitoring dashboard (``Mission Control'', accessible at \href{https://orion.taila855ba.ts.net}{orion.taila855ba.ts.net}) polls the fleet every 10 seconds, providing container status (running, idle, or busy, detected via MCP log recency and CPU usage), per-scientist resource consumption, per-project pipeline progress displayed as a stage-by-stage progress bar, per-stage per-iteration cost aggregated from LLM API call logs, and an inventory of completed papers with titles, dates, and total project costs.
 
 Cost transparency is a design priority. Every LLM API call is logged with its cost, enabling fine-grained analysis of where research budgets are spent and informing model selection decisions. Representative per-paper costs for early projects are reported in Table~\ref{tab:costs}.
 
