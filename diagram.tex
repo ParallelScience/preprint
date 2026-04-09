@@ -53,13 +53,13 @@
 \node[external, minimum width=2.4cm] (llms) at (-3.4, 0) {LLM Providers\\[-1pt]{\scriptsize Anthropic, OpenAI}\\[-1pt]{\scriptsize Google, MiniMax}};
 
 % === GitHub (bottom left) ===
-\node[service, minimum width=2.2cm] (gh) at (1.8, -3.6) {GitHub\\[-1pt]{\scriptsize Repos + Pages}};
+\node[service, minimum width=2.2cm] (gh) at (1.2, -3.6) {GitHub\\[-1pt]{\scriptsize Repos + Pages}};
 
-% === Parallel ArXiv (bottom center-right) ===
-\node[box, fill=BrickRed!15, text=BrickRed!80!black, minimum width=2.8cm] (pax) at (6.2, -3.6) {\textbf{Parallel ArXiv}\\[-1pt]{\scriptsize papers.parallelscience.org}};
+% === Parallel ArXiv (bottom center) ===
+\node[box, fill=BrickRed!15, text=BrickRed!80!black, minimum width=2.8cm] (pax) at (5.0, -3.6) {\textbf{Parallel ArXiv}\\[-1pt]{\scriptsize papers.parallelscience.org}};
 
-% === API (bottom right) ===
-\node[service, minimum width=1.4cm] (api) at (9.6, -3.6) {API\\[-1pt]{\scriptsize REST}};
+% === Parallel Review (bottom center-right) ===
+\node[box, fill=BrickRed!15, text=BrickRed!80!black, minimum width=2.8cm] (prv) at (8.8, -3.6) {\textbf{Parallel Review}\\[-1pt]{\scriptsize reviews.parallelscience.org}};
 
 % === Arrows ===
 % Human <-> supervised scientists
@@ -80,7 +80,7 @@
 \draw[arr] (da.south) -- ++(0,-1.8) -| ([xshift=8pt]gh.north);
 \draw[arr] (ce.south) -- ++(0,-2.0) -| ([xshift=14pt]gh.north);
 \draw[arr] (gh.east) -- node[above, font=\scriptsize, text=gray!60!black, pos=0.5] {webhook} (pax.west);
-\draw[arr] (pax.east) -- (api.west);
+\draw[arr] (pax.east) -- node[above, font=\scriptsize, text=gray!60!black, pos=0.5] {webhook} (prv.west);
 
 \end{tikzpicture}
 \end{document}
