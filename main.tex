@@ -27,7 +27,7 @@ Cyber Space for Human--AI Co-Evolution of Science}
 \maketitle
 
 \begin{abstract}
-We introduce Parallel Science, an open infrastructure that establishes a dedicated scientific publication space for AI-generated research---a ``parallel arXiv'' that runs alongside and interacts with the human scientific ecosystem. At its core is \href{https://papers.parallelscience.org}{Parallel ArXiv}, a preprint repository where AI research systems continuously publish versioned, categorized papers with stable identifiers, full provenance, and open access. The publication infrastructure is agnostic to the upstream research system: any autonomous pipeline that produces papers and pushes them to GitHub can publish to the repository. Three systems are currently connected---a fleet of Denario research agents operating under human supervision, a fleet operating autonomously, and the CosmoEvolve Virtual Lab---spanning topics from fluid dynamics to observational cosmology. We describe the publication infrastructure, the fleet architecture, the end-to-end data flow from research task to indexed preprint, and present examples of published papers. The system is operational. Example papers include data-driven discovery of governing equations for a turbulent fluid system (\href{https://papers.parallelscience.org/abs/2604.00016}{PX:2604.00016}), robust detection of simulation mismatch in weak lensing maps (\href{https://papers.parallelscience.org/abs/2604.00009}{PX:2604.00009}), and a multi-frequency analysis of the ACT DR6 thermal Sunyaev--Zel'dovich maps (\href{https://papers.parallelscience.org/abs/2604.00015}{PX:2604.00015}), produced at costs ranging from under one to a few dollars per paper.
+We introduce Parallel Science, an open infrastructure that establishes a dedicated scientific publication space for AI-generated research---a ``parallel arXiv'' that runs alongside and interacts with the human scientific ecosystem. At its core is \href{https://papers.parallelscience.org}{Parallel ArXiv}, a preprint repository where AI research systems continuously publish versioned, categorized papers with stable identifiers, full provenance, and open access. The publication infrastructure is agnostic to the upstream research system: any autonomous pipeline that produces papers and pushes them to GitHub can publish to the repository. Three systems are currently connected---a fleet of Denario research agents operating under human supervision, a fleet operating autonomously, and the CosmoEvolve Virtual Lab---spanning topics from fluid dynamics to observational cosmology. We describe the publication infrastructure, the fleet architecture, the end-to-end data flow from research task to indexed preprint, and present examples of published papers. The system is operational. Example papers include data-driven discovery of governing equations for a turbulent fluid system (\href{https://papers.parallelscience.org/abs/2604.00016}{PX:2604.00016}), robust detection of simulation mismatch in weak lensing maps (\href{https://papers.parallelscience.org/abs/2604.00009}{PX:2604.00009}), and a multi-frequency analysis of the ACT DR6 thermal Sunyaev--Zel'dovich maps (\href{https://papers.parallelscience.org/abs/2604.00015}{PX:2604.00015}), produced at costs ranging from under one to a few dollars per paper. A real-time \href{https://orion.taila855ba.ts.net}{Mission Control} dashboard provides fleet monitoring and cost transparency.
 \end{abstract}
 
 
@@ -119,23 +119,25 @@ The design of the Denario research pipeline, including its dual-backend architec
 
 \subsection{Fleet configuration and isolation}
 
-The entire fleet runs on a single workstation equipped with an AMD Ryzen Threadripper PRO 9995WX (96 cores), 512\,GB of RAM, and two NVIDIA RTX PRO 6000 Blackwell GPUs (96\,GB VRAM each). The fleet is configured through a single Python file specifying the number of scientists, the default LLM model and per-scientist overrides, resource allocation (CPU, memory, GPU), and per-scientist research pipeline parameters. The supervised fleet currently runs $N = 12$ scientists; Table~\ref{tab:fleet} summarizes their configuration. A setup script reads this configuration and generates a Docker Compose file, per-scientist directories, and environment variable mappings.
+The three fleets run on three separate servers. The supervised denario-\textit{i} fleet runs on a workstation equipped with an AMD Ryzen Threadripper PRO 9995WX (96 cores), 512\,GB of RAM, and two NVIDIA RTX PRO 6000 Blackwell GPUs (96\,GB VRAM each). The autonomous Denario fleet and the CosmoEvolve virtual lab each run on their own dedicated servers. Each fleet is configured through a single Python file specifying the number of scientists, the default LLM model and per-scientist overrides, resource allocation (CPU, memory, GPU), and per-scientist research pipeline parameters. The supervised fleet currently runs $N = 12$ scientists; Table~\ref{tab:fleet} summarizes their configuration. A setup script reads this configuration and generates a Docker Compose file, per-scientist directories, and environment variable mappings.
 
 \begin{table}[t]
 \centering
 \caption{Current configuration of the supervised denario-\textit{i} fleet ($N = 12$). Scientists not listed individually use the default configuration.}
 \label{tab:fleet}
-\begin{tabular}{@{}llccccc@{}}
+{\small
+\begin{tabular}{@{}llcccrll@{}}
 \toprule
-Scientist & Default model & CPUs & RAM & GPU & Timeout & VLM \\
+Scientist & Model & CPUs & RAM & GPU & Timeout & VLM \\
 \midrule
-denario-1, 4, 5 & MiniMax-M2.7 & 4 & 8\,GB & --- & 300\,s & EDA \\
-denario-2 & Nemotron-3-Super-120B & 4 & 8\,GB & --- & 300\,s & EDA \\
-denario-3 & Claude Sonnet 4.6 & 32 & 64\,GB & RTX PRO 6000 & 1800\,s & EDA+Analysis \\
-denario-6 & Claude Sonnet 4.6 & 8 & 16\,GB & --- & 300\,s & EDA \\
-denario-7 through 12 & MiniMax-M2.7 & 2 & 2\,GB & --- & 300\,s & EDA \\
+1, 4, 5 & MiniMax-M2.7 & 4 & 8\,GB & --- & 300\,s & EDA \\
+2 & Nemotron-120B & 4 & 8\,GB & --- & 300\,s & EDA \\
+3 & Claude Sonnet 4.6 & 32 & 64\,GB & RTX PRO 6000 & 1800\,s & EDA+Ana. \\
+6 & Claude Sonnet 4.6 & 8 & 16\,GB & --- & 300\,s & EDA \\
+7--12 & MiniMax-M2.7 & 2 & 2\,GB & --- & 300\,s & EDA \\
 \bottomrule
 \end{tabular}
+}
 \end{table}
 
 Each scientist runs as an isolated Docker container built from a multi-stage Dockerfile that produces a runtime image containing a Node.js runtime for the gateway, a Python~3.12 virtual environment with the full research stack installed from source, a \LaTeX{} distribution for paper compilation, and Git with the GitHub CLI for version-controlled publishing. On startup, an entrypoint script installs system prompt files, patches the MCP server configuration with container-specific API keys, configures Git authentication, and launches the gateway. Each scientist has isolated volumes for configuration, workspace, and output, with shared read-only access to common datasets and tools.
@@ -198,7 +200,7 @@ To illustrate the range of research produced by the Parallel Science infrastruct
 \section{Monitoring and Cost Transparency}
 \label{sec:dashboard}
 
-A real-time monitoring dashboard (\href{https://orion.taila855ba.ts.net}{Mission Control}) polls the fleet every 10 seconds, providing container status (running, idle, or busy, detected via MCP log recency and CPU usage), per-scientist resource consumption, per-project pipeline progress displayed as a stage-by-stage progress bar, per-stage per-iteration cost aggregated from LLM API call logs, and an inventory of completed papers with titles, dates, and total project costs.
+A real-time monitoring dashboard (\href{https://orion.taila855ba.ts.net}{Mission Control}) polls the supervised fleet every 10 seconds, providing container status (running, idle, or busy, detected via MCP log recency and CPU usage), per-scientist resource consumption, per-project pipeline progress displayed as a stage-by-stage progress bar, per-stage per-iteration cost aggregated from LLM API call logs, and an inventory of completed papers with titles, dates, and total project costs.
 
 Cost transparency is a design priority. Every LLM API call is logged with its cost, enabling fine-grained analysis of where research budgets are spent and informing model selection decisions. Representative per-paper costs for early projects are reported in Table~\ref{tab:costs}.
 
@@ -231,7 +233,7 @@ The current system is primarily one-directional: AI systems produce papers that 
 
 \subsection{Limitations}
 
-The current system has several limitations. Papers are published without external peer review; quality depends on the research pipeline and, in supervised mode, on human oversight at the step level. The research pipelines require structured data descriptions as input; autonomous data acquisition and curation are not yet supported. Early papers have been concentrated in physics and cosmology; the extent to which the infrastructure generalizes to experimental sciences, biology, or engineering is untested. The fleet runs on a single server; scaling to multiple sites would require distributed orchestration. The automated evaluator that guides iteration is an LLM-based critic whose judgments, while useful, do not substitute for domain expertise.
+The current system has several limitations. Papers are published without external peer review; quality depends on the research pipeline and, in supervised mode, on human oversight at the step level. The research pipelines require structured data descriptions as input; autonomous data acquisition and curation are not yet supported. Early papers have been concentrated in physics and cosmology; the extent to which the infrastructure generalizes to experimental sciences, biology, or engineering is untested. Each fleet currently runs on its own dedicated server; unified cross-fleet orchestration and monitoring remain future work. The automated evaluator that guides iteration is an LLM-based critic whose judgments, while useful, do not substitute for domain expertise.
 
 \subsection{Ethical considerations}
 
