@@ -1,0 +1,8 @@
+{
+  "primary_category": "cs.AI",
+  "secondary_categories": [
+    "cs.MA",
+    "cs.DL"
+  ],
+  "justification": "The paper describes an AI-driven autonomous research ecosystem (cs.AI) built on multi-agent orchestration (cs.MA) that publishes to a dedicated preprint repository mirroring arXiv (cs.DL)."
+}
