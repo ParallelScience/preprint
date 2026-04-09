@@ -125,14 +125,15 @@ The entire fleet runs on a single workstation equipped with an AMD Ryzen Threadr
 \centering
 \caption{Current configuration of the supervised denario-\textit{i} fleet ($N = 12$). Scientists not listed individually use the default configuration.}
 \label{tab:fleet}
-\begin{tabular}{@{}llccc@{}}
+\begin{tabular}{@{}llccccc@{}}
 \toprule
-Scientist & Default model & CPUs & RAM & GPU \\
+Scientist & Default model & CPUs & RAM & GPU & Timeout & VLM \\
 \midrule
-denario-1, 2, 4, 5 & MiniMax-M2.7 & 4 & 8\,GB & --- \\
-denario-3 & Claude Sonnet 4.6 & 32 & 64\,GB & RTX PRO 6000 \\
-denario-6 & Claude Sonnet 4.6 & 8 & 16\,GB & --- \\
-denario-7 through 12 & MiniMax-M2.7 & 2 & 2\,GB & --- \\
+denario-1, 4, 5 & MiniMax-M2.7 & 4 & 8\,GB & --- & 300\,s & EDA \\
+denario-2 & Nemotron-3-Super-120B & 4 & 8\,GB & --- & 300\,s & EDA \\
+denario-3 & Claude Sonnet 4.6 & 32 & 64\,GB & RTX PRO 6000 & 1800\,s & EDA+Analysis \\
+denario-6 & Claude Sonnet 4.6 & 8 & 16\,GB & --- & 300\,s & EDA \\
+denario-7 through 12 & MiniMax-M2.7 & 2 & 2\,GB & --- & 300\,s & EDA \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -197,7 +198,7 @@ To illustrate the range of research produced by the Parallel Science infrastruct
 \section{Monitoring and Cost Transparency}
 \label{sec:dashboard}
 
-A real-time monitoring dashboard (``Mission Control'', accessible at \href{https://orion.taila855ba.ts.net}{orion.taila855ba.ts.net}) polls the fleet every 10 seconds, providing container status (running, idle, or busy, detected via MCP log recency and CPU usage), per-scientist resource consumption, per-project pipeline progress displayed as a stage-by-stage progress bar, per-stage per-iteration cost aggregated from LLM API call logs, and an inventory of completed papers with titles, dates, and total project costs.
+A real-time monitoring dashboard (\href{https://orion.taila855ba.ts.net}{Mission Control}) polls the fleet every 10 seconds, providing container status (running, idle, or busy, detected via MCP log recency and CPU usage), per-scientist resource consumption, per-project pipeline progress displayed as a stage-by-stage progress bar, per-stage per-iteration cost aggregated from LLM API call logs, and an inventory of completed papers with titles, dates, and total project costs.
 
 Cost transparency is a design priority. Every LLM API call is logged with its cost, enabling fine-grained analysis of where research budgets are spent and informing model selection decisions. Representative per-paper costs for early projects are reported in Table~\ref{tab:costs}.
 
@@ -209,9 +210,9 @@ Cost transparency is a design priority. Every LLM API call is logged with its co
 \toprule
 Paper & System & Iterations & Model & Total cost \\
 \midrule
-PX:2604.00016 & Denario (supervised) & 2 & MiniMax-M2.7 & \$0.61 \\
-PX:2604.00009 & Denario (supervised) & 3 & Claude Sonnet 4.6 & \$2.40 \\
-PX:2604.00015 & CosmoEvolve (auto) & 1 & Mixed & \$4.10 \\
+\href{https://papers.parallelscience.org/abs/2604.00016}{PX:2604.00016} & Denario (supervised) & 2 & MiniMax-M2.7 & \$0.61 \\
+\href{https://papers.parallelscience.org/abs/2604.00009}{PX:2604.00009} & Denario (supervised) & 3 & Claude Sonnet 4.6 & \$2.40 \\
+\href{https://papers.parallelscience.org/abs/2604.00015}{PX:2604.00015} & CosmoEvolve (auto) & 1 & Mixed & \$4.10 \\
 \bottomrule
 \end{tabular}
 \end{table}
