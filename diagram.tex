@@ -17,37 +17,31 @@
 ]
 
 % === Scientists ===
-\node[scientist] (d1) at (0, 0) {
-  \textbf{denario-1}\\[1pt]
+\node[scientist, minimum width=3.0cm] (dN) at (1.6, 0) {
+  \textbf{denario-1..\textit{N}}\\[1pt]
   {\scriptsize OpenClaw + Slack}\\[-1pt]
-  {\scriptsize Denario pipeline}
+  {\scriptsize Denario pipeline}\\[-1pt]
+  {\scriptsize\itshape Supervised fleet}
 };
-\node[scientist] (dN) at (3.2, 0) {
-  \textbf{denario-\textit{N}}\\[1pt]
-  {\scriptsize OpenClaw + Slack}\\[-1pt]
-  {\scriptsize Denario pipeline}
-};
-\node[scientist] (da) at (6.4, 0) {
+\node[scientist] (da) at (5.6, 0) {
   \textbf{Denario}\\[1pt]
-  {\scriptsize Autonomous fleet}\\[-1pt]
+  {\scriptsize\itshape Autonomous fleet}\\[-1pt]
   {\scriptsize Python loop}\\[-1pt]
-  {\scriptsize Denario pipeline}
+  {\scriptsize\itshape Denario fleet}
 };
-\node[scientist] (ce) at (9.6, 0) {
+\node[scientist] (ce) at (9.0, 0) {
   \textbf{CosmoEvolve}\\[1pt]
   {\scriptsize Virtual Lab}\\[-1pt]
   {\scriptsize OpenClaw}\\[-1pt]
   {\scriptsize CosmoEvolve pipeline}
 };
 
-% Fleet label (below supervised only)
-\node[font=\scriptsize\itshape, text=gray!50!black] at (1.6, -1.4) {Supervised fleet};
 
 % === Human supervisors (top left) ===
-\node[service, minimum width=2.8cm] (human) at (1.9, 3.5) {Human Supervisors\\[-1pt]{\scriptsize Slack}};
+\node[service, minimum width=2.8cm] (human) at (1.6, 3.5) {Human Supervisors\\[-1pt]{\scriptsize Slack}};
 
 % === Mission Control (top right) ===
-\node[service, minimum width=2.6cm] (dash) at (7.5, 3.5) {Mission Control\\[-1pt]{\scriptsize Fleet dashboard}};
+\node[service, minimum width=2.6cm] (dash) at (7.3, 3.5) {Mission Control\\[-1pt]{\scriptsize Fleet dashboard}};
 
 % === LLM providers (left) ===
 \node[external, minimum width=2.4cm] (llms) at (-3.4, 0) {LLM Providers\\[-1pt]{\scriptsize Anthropic, OpenAI}\\[-1pt]{\scriptsize Google, MiniMax}};
@@ -63,7 +57,6 @@
 
 % === Arrows ===
 % Human <-> supervised scientists
-\draw[darr] (human.south) -- ++(0,-0.5) -| (d1.north);
 \draw[darr] (human.south) -- ++(0,-0.5) -| (dN.north);
 
 % Dashboard: solid from supervised, dashed from others
@@ -72,13 +65,12 @@
 \draw[arr, dashed] (ce.north) -- ++(0,1.6) -| ([xshift=5pt]dash.south);
 
 % LLMs
-\draw[darr] (llms.east) -- (d1.west);
+\draw[darr] (llms.east) -- (dN.west);
 
 % Scientists -> GitHub
-\draw[arr] (d1.south) -- ++(0,-1.8) -| ([xshift=-8pt]gh.north);
-\draw[arr] (dN.south) -- ++(0,-2.0) -| ([xshift=0pt]gh.north);
-\draw[arr] (da.south) -- ++(0,-1.8) -| ([xshift=8pt]gh.north);
-\draw[arr] (ce.south) -- ++(0,-2.0) -| ([xshift=14pt]gh.north);
+\draw[arr] (dN.south) -- ++(0,-1.8) -| ([xshift=-4pt]gh.north);
+\draw[arr] (da.south) -- ++(0,-2.0) -| ([xshift=4pt]gh.north);
+\draw[arr] (ce.south) -- ++(0,-1.8) -| ([xshift=12pt]gh.north);
 \draw[arr] (gh.east) -- node[above, font=\scriptsize, text=gray!60!black, pos=0.5] {webhook} (pax.west);
 \draw[arr] (pax.east) -- node[above, font=\scriptsize, text=gray!60!black, pos=0.5] {webhook} (prv.west);
 
