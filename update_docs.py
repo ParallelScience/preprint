@@ -58,6 +58,7 @@ def extract_abstract(tex: str) -> str:
 def main():
     tex_path = os.path.join(DIR, "main.tex")
     pdf_path = os.path.join(DIR, "main.pdf")
+    bib_path = os.path.join(DIR, "references.bib")
     index_path = os.path.join(DIR, "docs", "index.html")
 
     with open(tex_path) as f:
@@ -80,6 +81,11 @@ def main():
     # Copy PDF
     shutil.copy2(pdf_path, os.path.join(DIR, "docs", "paper.pdf"))
     print("  Copied docs/paper.pdf")
+
+    # Copy bibliography.bib so Parallel ArXiv can extract citations
+    # (scraper looks for <pages-url>/bibliography.bib).
+    shutil.copy2(bib_path, os.path.join(DIR, "docs", "bibliography.bib"))
+    print("  Copied docs/bibliography.bib")
 
     # Update index.html
     with open(index_path) as f:
